@@ -1,0 +1,26 @@
+= Version History =
+
+0.2:
+
+- Android push
+- WS Pack integration for auth and api key
+- Removed sql calls where possible
+- Added config dbprefix where needed
+- Removed hard coded typeids 
+- Removed subsite_id where possible, api should be called on subsite now
+- Added some translations
+- Add to river for new files and pages
+- Fixed files in folders bug: files in folders are no longer showed in root also
+- Increased mobile push messages handler batch size
+- Added swordfish_notify stub
+- Fixed several int/string related bugs
+- Fixed several push related bugs
+- Removed custom auth functions
+- Generic like/comment
+- Added mark_message function
+- Fixed several Swordfish related bugs
+- Some cleaning up
+
+0.1:
+
+- first pre-release

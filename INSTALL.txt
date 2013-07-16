@@ -1,0 +1,22 @@
+= Instructions =
+
+- install required ws_pack plugin
+
+- install plugin in main site + desired subsite(s)
+
+- enabled elgg API usage (/admin/settings/advanced)
+
+- enable ws_pack API usage (/admin/plugin_settings/ws_pack)
+
+- generate approval request (is automatic part of login process with the pleio api)
+
+- confirm registration in ws_pack (/admin/administer_utilities/ws_pack?tab=pending) 
+		
+- verify proper installation of cron (including minute/fiveminute) 
+	See also: http://docs.elgg.org/wiki/Cron
+	
+- set swordfish_api_key in settings
+
+- convert your Apple certificate to PEM and place it in mod/pleio_api/apns.pem
+
+- replace your GCM_API_KEY in helpers.php 
