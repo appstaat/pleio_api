@@ -15,8 +15,8 @@
 - verify proper installation of cron (including minute/fiveminute) 
 	See also: http://docs.elgg.org/wiki/Cron
 	
-- set swordfish_api_key in settings
+- set swordfish_api_key in the plugin settings
 
 - convert your Apple certificate to PEM and place it in mod/pleio_api/apns.pem
 
-- replace your GCM_API_KEY in helpers.php 
+- enter your GCM API key in the plugin settings 

@@ -718,7 +718,7 @@ function pleio_api_push_apns_messages($apnsMessages = array()) {
 function pleio_api_push_gcm_messages($gcmMessages = array()) {
 	if (! sizeof ( $gcmMessages ))
 		return;
-	$apiKey = GCM_API_KEY;
+	$apiKey = elgg_get_plugin_setting ( "gcm_api_key", "pleio_api" );
 	$url = 'https://android.googleapis.com/gcm/send';
 	$headers = array ('Authorization: key=' . $apiKey, 'Content-Type: application/json' );
 	$ch = curl_init ();
