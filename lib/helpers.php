@@ -774,10 +774,18 @@ function pleio_api_create_object_handler($event, $object_type, $object) {
 }
 
 function pleio_api_queue_push_message_for_river($river) {
-	$message = new ElggObject ( );
-	$message->subtype = 'push_message_queue';
-	$message->river_id = $river->id;
-	$r = $message->save ();
+	if ($river instanceof ElggRiverItem) {
+		$object = $river->getObjectEntity();
+		if ($object) {
+			if (in_array ( $object->getType (), array ("user", "group" ) ) || in_array ( $object->getSubtype (), 
+					array ("file", "page", "page_top", "subsite", "thewire", "plugin" ) )) {
+				$message = new ElggObject ( );
+				$message->subtype = 'push_message_queue';
+				$message->river_id = $river->id;
+				$r = $message->save ();
+			}
+		}
+	}
 }
 
 function pleio_api_queue_push_message($to_guid, $from_guid, $message, $object_type, $object_guid = 0, $site_guid = 0, 
