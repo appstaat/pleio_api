@@ -1,11 +1,5 @@
 <?php
 $params = get_input ( "params" );
-//var_dump ( $params, $_FILES );
-//$logo_contents = get_uploaded_file ( "mobile_logo" );
-//print "<img src='data:image/jpg;base64,";
-//print base64_encode ( $logo_contents );
-//print "' alt='logo'>";
-//exit ();
 if (! empty ( $params ) && is_array ( $params )) {
 	$error_count = 0;
 	foreach ( $params as $setting => $value ) {
@@ -31,5 +25,4 @@ if (! empty ( $params ) && is_array ( $params )) {
 } else {
 	register_error ( elgg_echo ( "plugins:settings:save:fail", array (elgg_echo ( "admin:settings:pleio_api" ) ) ) );
 }
-//forward ( REFERER );
-var_dump ( $error_count );
+forward ( REFERER );
