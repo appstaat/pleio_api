@@ -177,34 +177,12 @@ function pleio_api_export($data, $exportable = null, $include = false) {
 	}
 	return $x;
 }
-function pleio_api_get_site_logo($site_guid = 1, $wwwroot) {
-	$settings = get_all_private_settings ( $site_guid );
-	$dataroot = get_config ( "dataroot", $site_guid );
-	$result = "";
-	$sitelogo = array_key_exists ( "sitelogo", $settings ) ? $settings ["sitelogo"] : false;
-	if ($sitelogo) {
-		switch ($sitelogo) {
-			case "custom" :
-				if (file_get_contents ( $dataroot . "pleio_template_selector/site_logos/logo_" . $site_guid )) {
-					$result = $wwwroot . "pg/template_selector/custom_sitelogo/logo.jpg";
-				}
-				break;
-			case "none" :
-				// nothing
-				break;
-			default :
-				$result = $wwwroot . "mod/pleio_template_selector/_graphics/sitelogos/" . $sitelogo . ".png";
-				break;
-		}
-	}
-	return $result;
-}
 
 function pleio_api_get_mobile_logo($site_guid = 1, $wwwroot) {
 	$dataroot = get_config ( "dataroot", $site_guid );
 	$result = "";
-	if (file_get_contents ( $dataroot . "pleio_template_selector/mobile_logos/logo_" . $site_guid )) {
-		$result = $wwwroot . "pg/template_selector/mobile_logo/logo.jpg";
+	if (file_get_contents ( $dataroot . "pleio_api/mobile_logos/logo_" . $site_guid )) {
+		$result = $wwwroot . "pg/pleio_api/mobile_logo/logo.jpg";
 	}
 	return $result;
 }
@@ -777,15 +755,23 @@ function pleio_api_queue_push_message_for_river($river) {
 	if ($river instanceof ElggRiverItem) {
 		$object = $river->getObjectEntity();
 		if ($object) {
-			if (in_array ( $object->getType (), array ("user", "group" ) ) || in_array ( $object->getSubtype (), 
-					array ("file", "page", "page_top", "subsite", "thewire", "plugin" ) )) {
+			if ($object->site_guid == "1" && $object->container_guid) {
+				$container = $object->getContainerEntity();
+				if (!($container instanceof ElggGroup)) {
+					return false;
+				}
+			}
+			$valid_types = array ("user", "group" );
+			$valid_subtypes = array ("file", "page", "page_top", "subsite", "thewire", "plugin" );
+			if (in_array ( $object->getType (), $valid_types ) || in_array ( $object->getSubtype (), $valid_subtypes )) {
 				$message = new ElggObject ( );
 				$message->subtype = 'push_message_queue';
 				$message->river_id = $river->id;
-				$r = $message->save ();
+				return $message->save ();
 			}
 		}
 	}
+	return false;
 }
 
 function pleio_api_queue_push_message($to_guid, $from_guid, $message, $object_type, $object_guid = 0, $site_guid = 0, 
@@ -845,4 +831,16 @@ function pleio_api_handle_push_queue() {
 	elgg_set_ignore_access ( 0 );
 	return sizeof ( $apnsMessages ) + sizeof ( $gcmMessages );
 }
-?>
+
+function pleio_api_save_mobile_logo($logo_contents) {
+	$dataroot = get_config ( "dataroot" );
+	$site_guid = get_config ( "site_id" );	
+	if(!empty($logo_contents)){
+		$path = $dataroot . "pleio_api/mobile_logos/";
+		if(!is_dir($path)){
+			mkdir($path, 0755, true);
+		}			
+		return file_put_contents($path . "logo_" . $site_guid, $logo_contents);
+	}		
+	return false;
+}
