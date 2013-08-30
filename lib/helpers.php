@@ -182,7 +182,7 @@ function pleio_api_get_mobile_logo($site_guid = 1, $wwwroot) {
 	$dataroot = get_config ( "dataroot", $site_guid );
 	$result = "";
 	if (file_get_contents ( $dataroot . "pleio_api/mobile_logos/logo_" . $site_guid )) {
-		$result = $wwwroot . "pg/pleio_api/mobile_logo/logo.jpg";
+		$result = $wwwroot . "pleio_api/mobile_logo/logo.jpg";
 	}
 	return $result;
 }

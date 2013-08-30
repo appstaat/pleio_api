@@ -8,7 +8,6 @@ if (! empty ( $params ) && is_array ( $params )) {
 	if ($logo_contents = get_uploaded_file ( "mobile_logo" )) {
 		if (pleio_api_save_mobile_logo ( $logo_contents )) {
 			// reset cache
-			elgg_regenerate_simplecache (); // update sc timestamps
 			elgg_invalidate_simplecache (); // remove files 
 			elgg_filepath_cache_reset ();
 		} else {
