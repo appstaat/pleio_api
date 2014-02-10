@@ -11,6 +11,9 @@ function pleio_api_init() {
 	elgg_register_event_handler ( 'create', 'friendrequest', 'pleio_api_create_object_handler' );
 	elgg_register_event_handler ( 'created', 'river', 'pleio_api_create_object_handler' );
 	elgg_register_plugin_hook_handler ( 'cron', 'minute', 'pleio_api_handle_push_queue' );
+	// elgg_register_plugin_hook_handler("api_key", "use", "pleio_api_use_api_key");
+	// elgg_register_plugin_hook_handler("view", "api/output", "pleio_api_view_api_output");
+	
 	// register settings action and menu item
 	elgg_register_action ( "pleio_api/settings", dirname ( __FILE__ ) . "/actions/settings.php", "admin" );
 	elgg_register_admin_menu_item ( "configure", "pleio_api", "settings" );

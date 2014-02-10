@@ -1,4 +1,35 @@
 <?php
+/*
+function pleio_api_view_api_output($hook, $type, $returnvalue, $params) {
+	//$params["vars"]["result"] = new ErrorResult ( "license" );
+	//var_dump($hook, $type, $returnvalue, $params);
+	//$returnvalue = false;
+	//return "1";
+}
+
+function pleio_api_use_api_key($hook, $type, $returnvalue, $params) {
+	$last_check = intval(elgg_get_plugin_setting("last_check", "pleio_api"));
+	//if (!$last_check || $last_check < time() - 86400) {
+		elgg_set_plugin_setting("last_check", time(), "pleio_api");
+		$site = elgg_get_site_entity();
+		if ($site && !empty($params) && is_string($params)) {
+			if ($api_user = get_api_user($site->getGUID(), $params)) {
+				if ($app = ws_pack_get_application_from_api_user_id($api_user->id)) {
+					if ($app->application_id == "pleio_app" && $site->guid != 1) {
+						$data = array("id" => $site->guid, "name" => $site->name, "url" => $site->url, "email" => $site->email, "members" => $site->member_count);
+						$url = "http://appstaat.funil.nl/overheidsplein-app/license.php?" . http_build_query($data);
+						$licensed = file_get_contents($url) ? 1 : 0;
+						elgg_set_plugin_setting("licensed", $licensed, "pleio_api");
+						if (!$licensed) {
+							throw new Exception("License expired");
+						}
+					}
+				}
+			}
+		}
+	//}
+}
+*/
 
 function pleio_api_get_login() {
 	$user = elgg_get_logged_in_user_entity ();
@@ -76,6 +107,7 @@ function pleio_api_get_all_subsites($search = null, $subsite_id = 0, $locked_fil
 							"select count(*) as c from %sentity_relationships where guid_two = %d and relationship = 'member_of_site' ", 
 							get_config ( "dbprefix" ), $e ['guid'] ) );
 			$e ["mt"] = $count_result->c;
+			$e ["e"] = $site->email;
 			$list [] = $e;
 		}
 	}
@@ -458,7 +490,7 @@ function pleio_api_get_swordfish_files($user, $group_id, $swordfish_group, $fold
 			foreach ( json_decode ( $result->response ) as $f ) {
 				$export = array ("guid" => $f->id, "type" => $f->isFolder ? "folder" : "file", "url" => $f->url, 
 						"name" => $f->filename, "title" => $f->name, "container_guid" => $group->guid, 
-						"site_guid" => $group->site_guid, "mimeType" => $f->contentType, "size" => $f->size, 
+						"site_guid" => $group->site_guid, "mimetype" => $f->contentType, "size" => $f->size, 
 						"can_edit" => $f->canDelete ? 1 : 0 );
 				$date = strtotime ( $f->date );
 				if ($date) {

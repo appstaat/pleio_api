@@ -390,7 +390,7 @@ function pleio_api_format_comment(ElggAnnotation $a, $user_guid = 0) {
 			"time_created" => $a->time_created, "avatar" => $u ["avatar"], "name" => $u ["name"], "can_edit" => $edit ? 1 : 0 );
 }
 
-function pleio_api_format_activity(ElggRiver $item) {
+function pleio_api_format_activity($item) {
 	$subject = $item->getSubjectEntity ();
 	$object = $item->getObjectEntity ();
 	if ($subject && $object) {
@@ -438,6 +438,7 @@ function pleio_api_format_activity(ElggRiver $item) {
 
 function pleio_api_swordfish_login($user_id, $ip, $expiry_time = 0) {
 	$shared_key = elgg_get_plugin_setting ( "swordfish_api_shared_key", "pleio_api" );
+//	var_dump($shared_key);
 	$expiry_time = $expiry_time ? $expiry_time : time () + 3600;
 	$hash = hash_hmac ( "SHA256", $user_id . $expiry_time . $ip, $shared_key );
 	return "__pleio_ac=" . $user_id . "&" . $expiry_time . "&" . $ip . "&" . $hash;
@@ -455,6 +456,7 @@ function pleio_api_call_swordfish_api($sw_user, $url, $method = "GET", $data = a
 	} elseif ($postdata) {
 		$url .= "?" . $postdata;
 	}
+//	var_dump($url, $postdata, $headers);
 	$http_opts ["header"] = implode ( "\r\n", $headers );
 	$opts = array ('http' => $http_opts );
 	$context = stream_context_create ( $opts );
