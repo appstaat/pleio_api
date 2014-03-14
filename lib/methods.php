@@ -956,7 +956,8 @@ function pleio_api_swordfish_parse_get_page($result, $swordfish_name) {
 			}
 		}
 		$export ["name"] = "";
-		$export ["access_name"] = "";
+		$export ["access_id"] = $response->visibility == "private" ? 0 : 2	;
+		$export ["access_name"] = $response->visibility == "private" ? "Privé" : "Publiek";
 		$export ["write_access_name"] = "";
 		$export ["allow_comments"] = $response->commentAllowed ? "yes" : "no";
 		$export ["can_edit"] = 1;

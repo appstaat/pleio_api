@@ -16,6 +16,12 @@ if (! empty ( $params ) && is_array ( $params )) {
 					elgg_echo ( "plugins:settings:save:fail", array (elgg_echo ( "admin:settings:pleio_api" ) ) ) );
 		}
 	}
+	if ($contents = get_uploaded_file ( "ios_push_certificate" )) {
+		if (!pleio_api_save_ios_push_certificate ( $contents )) {
+			$error_count ++;
+			register_error ( elgg_echo ( "plugins:settings:save:fail", array (elgg_echo ( "admin:settings:pleio_api" ) ) ) );
+		}
+	}
 	if (! $error_count) {
 		system_message ( elgg_echo ( "plugins:settings:save:ok", array (elgg_echo ( "admin:settings:pleio_api" ) ) ) );
 	} else {

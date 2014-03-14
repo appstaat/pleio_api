@@ -187,6 +187,11 @@ function pleio_api_get_mobile_logo($site_guid = 1, $wwwroot) {
 	return $result;
 }
 
+function pleio_api_get_ios_push_certificate($site_guid = 1) {
+	$dataroot = get_config ( "dataroot", $site_guid );
+	return $dataroot . "pleio_api/ios_push_certificate.pem";
+}
+
 function pleio_api_get_site_colors($site_guid = 1) {
 	$settings = get_all_private_settings ( $site_guid );
 	$colorset = array_key_exists ( "colorset", $settings ) ? $settings ["colorset"] : false;
@@ -676,12 +681,16 @@ function pleio_api_push_apns_messages($apnsMessages = array()) {
 	if (! sizeof ( $apnsMessages ))
 		return;
 	$error = 0;
-	$errorString = "";
-	$apnsCert = elgg_get_plugins_path () . "pleio_api/apns.pem";
+	$errorString = "";	
+	$dataroot = get_config ( "dataroot" );
+	$apnsCert = $dataroot . "pleio_api/ios_push_certificate.pem";
+	if (!file_exists($apnsCert))
+		return;	
+	//$apnsCert = elgg_get_plugins_path () . "pleio_api/apns.pem";
 	$apnsHost = 'gateway.push.apple.com:2195';
 	$streamContext = stream_context_create ();
 	stream_context_set_option ( $streamContext, 'ssl', 'local_cert', $apnsCert );
-	set_time_limit ( 5 );
+//	set_time_limit ( 5 );
 	$apns = stream_socket_client ( 'ssl://' . $apnsHost, $error, $errorString, 5, STREAM_CLIENT_CONNECT, $streamContext );
 	if ($apns) {
 		foreach ( $apnsMessages as $apnsMessage ) {
@@ -802,9 +811,9 @@ function pleio_api_queue_push_message($to_guid, $from_guid, $message, $object_ty
 	}
 }
 
-function pleio_api_handle_push_queue() {
+function pleio_api_handle_push_queue() {	
 	$max_messages = 300;
-	set_time_limit ( 120 );
+	set_time_limit ( 59 );
 	elgg_set_ignore_access ( 1 );
 	$messages = elgg_get_entities ( 
 			array ('types' => 'object', 'subtypes' => 'push_message_queue', 'site_guid' => ELGG_ENTITIES_ANY_VALUE, 
@@ -843,6 +852,19 @@ function pleio_api_save_mobile_logo($logo_contents) {
 			mkdir($path, 0755, true);
 		}			
 		return file_put_contents($path . "logo_" . $site_guid, $logo_contents);
+	}		
+	return false;
+}
+
+function pleio_api_save_ios_push_certificate($contents) {
+	$dataroot = get_config ( "dataroot" );
+	$site_guid = get_config ( "site_id" );	
+	if(!empty($contents)){
+		$path = $dataroot . "pleio_api";
+		if(!is_dir($path)){
+			mkdir($path, 0755, true);
+		}			
+		return file_put_contents($path . "/ios_push_certificate.pem", $contents);
 	}		
 	return false;
 }
