@@ -1,35 +1,40 @@
 <?php
-/*
-function pleio_api_view_api_output($hook, $type, $returnvalue, $params) {
-	//$params["vars"]["result"] = new ErrorResult ( "license" );
-	//var_dump($hook, $type, $returnvalue, $params);
-	//$returnvalue = false;
-	//return "1";
-}
 
 function pleio_api_use_api_key($hook, $type, $returnvalue, $params) {
-	$last_check = intval(elgg_get_plugin_setting("last_check", "pleio_api"));
-	//if (!$last_check || $last_check < time() - 86400) {
-		elgg_set_plugin_setting("last_check", time(), "pleio_api");
-		$site = elgg_get_site_entity();
-		if ($site && !empty($params) && is_string($params)) {
-			if ($api_user = get_api_user($site->getGUID(), $params)) {
-				if ($app = ws_pack_get_application_from_api_user_id($api_user->id)) {
-					if ($app->application_id == "pleio_app" && $site->guid != 1) {
-						$data = array("id" => $site->guid, "name" => $site->name, "url" => $site->url, "email" => $site->email, "members" => $site->member_count);
-						$url = "http://appstaat.funil.nl/overheidsplein-app/license.php?" . http_build_query($data);
-						$licensed = file_get_contents($url) ? 1 : 0;
-						elgg_set_plugin_setting("licensed", $licensed, "pleio_api");
-						if (!$licensed) {
-							throw new Exception("License expired");
+	$site = elgg_get_site_entity ();
+	if ($site && $site->guid != 1) {
+		$license_key = elgg_get_plugin_setting ( "license_key", "pleio_api" );
+		$last_check = intval ( elgg_get_plugin_setting ( "last_license_check", "pleio_api" ) );
+		$hash = hash_hmac ( "SHA256", $site->url, $site->guid );
+		if (! $license_key || $hash != $license_key || ! $last_check || $last_check < time () - 86400) {
+			elgg_set_plugin_setting ( "last_license_check", time (), "pleio_api" );
+			if (! empty ( $params ) && is_string ( $params )) {
+				$api_user = get_api_user ( $site->getGUID (), $params );
+				if ($api_user) {
+					$app = ws_pack_get_application_from_api_user_id ( $api_user->id );
+					if ($app) {
+						if ($app->application_id == "pleio_app") {
+							$data = array ("id" => $site->guid, "name" => $site->name, "url" => $site->url, "email" => $site->email, "members" => $site->member_count );
+							$url = "http://appstaat.funil.nl/overheidsplein-app/license.php?" . http_build_query ( $data );
+							try {
+								$response = file_get_contents ( $url );
+								if ($response) {
+									$response = json_decode ( $response );
+									$license_key = $response->key;
+									elgg_set_plugin_setting ( "license_key", $license_key, "pleio_api" );
+								}
+							} catch ( Exception $ex ) {
+							}
 						}
 					}
 				}
 			}
 		}
-	//}
+		if (! $license_key) {
+			return false;
+		}
+	}
 }
-*/
 
 function pleio_api_get_login() {
 	$user = elgg_get_logged_in_user_entity ();
@@ -58,8 +63,7 @@ function pleio_api_get_button_names() {
 	return $list;
 }
 
-function pleio_api_get_all_subsites($search = null, $subsite_id = 0, $locked_filter = 0, $order_by = 0, $offset = 0, 
-		$wheres = array (), $joins = array()) {
+function pleio_api_get_all_subsites($search = null, $subsite_id = 0, $locked_filter = 0, $order_by = 0, $offset = 0, $wheres = array (), $joins = array()) {
 	$list = array ();
 	$total = 0;
 	$joins [] = sprintf ( " INNER JOIN %ssites_entity s USING (guid) ", get_config ( "dbprefix" ) );
@@ -75,8 +79,7 @@ function pleio_api_get_all_subsites($search = null, $subsite_id = 0, $locked_fil
 		$joins [] = sprintf ( " INNER JOIN %sprivate_settings ps ON ps.entity_guid = guid ", get_config ( "dbprefix" ) );
 		$wheres [] = " ps.name = 'membership' AND ps.value != 'open' ";
 	}
-	$options = array ('type' => 'site', 'limit' => 20, 'offset' => $offset, 'count' => true, "wheres" => $wheres, 
-			"joins" => $joins );
+	$options = array ('type' => 'site', 'limit' => 20, 'offset' => $offset, 'count' => true, "wheres" => $wheres, "joins" => $joins );
 	if ($subsite_id) {
 		$options ["guids"] = $subsite_id;
 	}
@@ -103,9 +106,8 @@ function pleio_api_get_all_subsites($search = null, $subsite_id = 0, $locked_fil
 			$e ["c"] = $colors [0];
 			$e ["fc"] = $colors [1];
 			$count_result = get_data_row ( 
-					sprintf ( 
-							"select count(*) as c from %sentity_relationships where guid_two = %d and relationship = 'member_of_site' ", 
-							get_config ( "dbprefix" ), $e ['guid'] ) );
+					sprintf ( "select count(*) as c from %sentity_relationships where guid_two = %d and relationship = 'member_of_site' ", get_config ( "dbprefix" ), 
+							$e ['guid'] ) );
 			$e ["mt"] = $count_result->c;
 			$e ["e"] = $site->email;
 			$list [] = $e;
@@ -133,20 +135,15 @@ function pleio_api_join_subsite($reason = "") {
 			return new ErrorResult ( "{$user->name} was al aangemeld op {$subsite->name}" );
 		} elseif ($subsite->canJoin ( $user->guid )) {
 			if ($subsite->addUser ( $user->guid )) {
-				return new SuccessResult ( 
-						elgg_echo ( "subsite_manager:action:subsites:add_user:success", 
-								array ($user->name, $subsite->name ) ) );
+				return new SuccessResult ( elgg_echo ( "subsite_manager:action:subsites:add_user:success", array ($user->name, $subsite->name ) ) );
 			} else {
-				return new ErrorResult ( 
-						elgg_echo ( "subsite_manager:action:subsites:add_user:error:add", 
-								array ($user->name, $subsite->name ) ) );
+				return new ErrorResult ( elgg_echo ( "subsite_manager:action:subsites:add_user:error:add", array ($user->name, $subsite->name ) ) );
 			}
 		} else {
 			switch ($subsite->getMembership ()) {
 				case Subsite::MEMBERSHIP_APPROVAL :
 					if ($reason && $subsite->requestMembership ( $reason )) {
-						return new SuccessResult ( 
-								elgg_echo ( "subsite_manager:actions:subsites:join:request_approval:success" ) );
+						return new SuccessResult ( elgg_echo ( "subsite_manager:actions:subsites:join:request_approval:success" ) );
 					} else {
 						return new ErrorResult ( "Goedkeuring vereist, geef een reden" );
 					}
@@ -174,8 +171,7 @@ function pleio_api_get_all_groups($search = null, $offset = 0, $group_id = 0) {
 			$wheres [] = " (s.name LIKE '%$search%' OR s.description LIKE '%$search%') ";
 			$joins [] = sprintf ( " INNER JOIN %sgroups_entity s USING (guid) ", get_config ( "dbprefix" ) );
 		}
-		$options = array ('type' => 'group', 'limit' => 20, 'offset' => $offset, 'count' => true, "wheres" => $wheres, 
-				"joins" => $joins );
+		$options = array ('type' => 'group', 'limit' => 20, 'offset' => $offset, 'count' => true, "wheres" => $wheres, "joins" => $joins );
 		if ($group_id) {
 			$options ["guids"] = $group_id;
 		}
@@ -199,8 +195,15 @@ function pleio_api_get_my_groups($search = null, $offset = 0) {
 			$wheres [] = " (s.name LIKE '%$search%' OR s.description LIKE '%$search%') ";
 			$joins [] = sprintf ( " INNER JOIN %sgroups_entity s USING (guid) ", get_config ( "dbprefix" ) );
 		}
-		$options = array ('type' => 'group', 'relationship' => 'member', 'relationship_guid' => $user->guid, 
-				'limit' => 20, 'offset' => $offset, 'count' => true, "wheres" => $wheres, "joins" => $joins );
+		$options = array (
+				'type' => 'group', 
+				'relationship' => 'member', 
+				'relationship_guid' => $user->guid, 
+				'limit' => 20, 
+				'offset' => $offset, 
+				'count' => true, 
+				"wheres" => $wheres, 
+				"joins" => $joins );
 		$total = elgg_get_entities_from_relationship ( $options );
 		$options ['count'] = false;
 		$groups = elgg_get_entities_from_relationship ( $options );
@@ -239,8 +242,7 @@ function pleio_api_join_group($group_id) {
 			// Notify group owner
 			$url = "{$CONFIG->url}groups/requests/$group->guid";
 			$subject = elgg_echo ( 'groups:request:subject', array ($user->name, $group->name ) );
-			$body = elgg_echo ( 'groups:request:body', 
-					array ($group->getOwnerEntity ()->name, $user->name, $group->name, $user->getURL (), $url ) );
+			$body = elgg_echo ( 'groups:request:body', array ($group->getOwnerEntity ()->name, $user->name, $group->name, $user->getURL (), $url ) );
 			if (notify_user ( $group->owner_guid, $user->getGUID (), $subject, $body )) {
 				return new SuccessResult ( elgg_echo ( "groups:joinrequestmade" ) );
 			} else {
@@ -257,8 +259,13 @@ function pleio_api_get_group($group_id = 0, $offset = 0) {
 	$user_id = $user !== false ? $user->guid : 0;
 	if ($user) {
 		$group_id = intval ( $group_id );
-		$options = array ('site_guid' => ELGG_ENTITIES_ANY_VALUE, 'type' => 'group', 'relationship' => 'member', 
-				'relationship_guid' => $user->guid, 'count' => false, "wheres" => array (" guid = $group_id " ) );
+		$options = array (
+				'site_guid' => ELGG_ENTITIES_ANY_VALUE, 
+				'type' => 'group', 
+				'relationship' => 'member', 
+				'relationship_guid' => $user->guid, 
+				'count' => false, 
+				"wheres" => array (" guid = $group_id " ) );
 		$groups = elgg_get_entities_from_relationship ( $options );
 		if (sizeof ( $groups )) {
 			$group = pleio_api_format_group ( $groups [0], $user_id );
@@ -299,8 +306,7 @@ function pleio_api_get_group_icon($group_id = 0) {
 	return new ErrorResult ( "Groep niet gevonden of geen lid" );
 }
 
-function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search = null, $offset = 0, $wheres = array (), 
-		$joins = array()) {
+function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search = null, $offset = 0, $wheres = array (), $joins = array()) {
 	$user = elgg_get_logged_in_user_entity ();
 	$list = array ();
 	$total = 0;
@@ -311,8 +317,7 @@ function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search 
 			$wheres [] = " (o.description LIKE '%$search%') ";
 			$joins [] = sprintf ( " INNER JOIN %sobjects_entity o USING (guid) ", get_config ( "dbprefix" ) );
 		}
-		$options = array ('type' => 'object', 'subtype' => 'thewire', 'limit' => 20, 'offset' => $offset, 
-				'count' => true, "wheres" => $wheres, "joins" => $joins );
+		$options = array ('type' => 'object', 'subtype' => 'thewire', 'limit' => 20, 'offset' => $offset, 'count' => true, "wheres" => $wheres, "joins" => $joins );
 		if ($group_id) {
 			$options ['container_guids'] = $group_id;
 		}
@@ -326,8 +331,7 @@ function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search 
 			case 2 :
 				$friends = get_user_friends ( $user->guid, "", 999999, 0 );
 				if (sizeof ( $friends )) {
-					$options ['owner_guids'] = array_map ( create_function ( '$user', 'return $user->guid;' ), 
-							$friends );
+					$options ['owner_guids'] = array_map ( create_function ( '$user', 'return $user->guid;' ), $friends );
 				} else {
 					return array ("total" => 0, "list" => array (), "offset" => $offset );
 				}
@@ -338,12 +342,10 @@ function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search 
 			$options ['count'] = false;
 			$items = elgg_get_entities ( $options );
 			foreach ( $items as $item ) {
-				$e = pleio_api_export ( $item, 
-						explode ( ",", "guid,time_created,owner_guid,container_guid,site_guid,description" ) );
+				$e = pleio_api_export ( $item, explode ( ",", "guid,time_created,owner_guid,container_guid,site_guid,description" ) );
 				$parent = get_data_row ( 
-						sprintf ( 
-								"select guid_two as guid from %sentity_relationships where relationship = 'parent' and guid_one = %d", 
-								get_config ( "dbprefix" ), $e ["guid"] ) );
+						sprintf ( "select guid_two as guid from %sentity_relationships where relationship = 'parent' and guid_one = %d", get_config ( "dbprefix" ), 
+								$e ["guid"] ) );
 				$e ["parent_guid"] = $parent ? intval ( $parent->guid ) : 0;
 				$u = pleio_api_format_user ( get_user ( $item->owner_guid ) );
 				$e ["name"] = $u ["name"];
@@ -372,8 +374,8 @@ function pleio_api_get_access_list() {
 		inner join %ssites_entity s on s.guid = r.guid_two
 		inner join %sprivate_settings p on r.guid_two = p.entity_guid and p.name = 'subsite_acl' 
 		inner join %saccess_collections a on a.id = p.value		
-		where guid_one = $user_id and relationship = 'member_of_site' ", get_config ( "dbprefix" ), 
-					get_config ( "dbprefix" ), get_config ( "dbprefix" ), get_config ( "dbprefix" ) ) ) as $subsite ) {
+		where guid_one = $user_id and relationship = 'member_of_site' ", get_config ( "dbprefix" ), get_config ( "dbprefix" ), get_config ( "dbprefix" ), 
+					get_config ( "dbprefix" ) ) ) as $subsite ) {
 		$list [$subsite->id] = "Deelsite: " . $subsite->name;
 	}
 	foreach ( get_data ( 
@@ -381,8 +383,7 @@ function pleio_api_get_access_list() {
 					"select a.id, g.name from %sentity_relationships r 
 		inner join %saccess_collections a on a.owner_guid = r.guid_two
 		inner join %sgroups_entity g on a.owner_guid = g.guid
-		where guid_one = $user_id and relationship = 'member' ", 
-					get_config ( "dbprefix" ), get_config ( "dbprefix" ), get_config ( "dbprefix" ) ) ) as $group ) {
+		where guid_one = $user_id and relationship = 'member' ", get_config ( "dbprefix" ), get_config ( "dbprefix" ), get_config ( "dbprefix" ) ) ) as $group ) {
 		$list [$group->id] = "Groep: " . $group->name;
 	}
 	return $list;
@@ -408,18 +409,12 @@ function pleio_api_send_tweio($message, $access_id = "", $reply = 0, $group_id =
 				$site_guid = $site_guid;
 				;
 				// site_guid wordt niet gezet door thewire_save_post
-				update_data ( 
-						sprintf ( "update %sentities set site_guid = %d where guid = %d", 
-								get_config ( "dbprefix" ), $site_guid, $guid ) );
-				update_data ( 
-						sprintf ( "update %sriver set site_guid = %d where object_guid = %d", 
-								get_config ( "dbprefix" ), $site_guid, $guid ) );
+				update_data ( sprintf ( "update %sentities set site_guid = %d where guid = %d", get_config ( "dbprefix" ), $site_guid, $guid ) );
+				update_data ( sprintf ( "update %sriver set site_guid = %d where object_guid = %d", get_config ( "dbprefix" ), $site_guid, $guid ) );
 			}
 			if ($group_id) {
 				// container_guid wordt niet gezet door thewire_save_post
-				update_data ( 
-						sprintf ( "update %sentities set container_guid = %d where guid = %d", 
-								get_config ( "dbprefix" ), $group_id, $guid ) );
+				update_data ( sprintf ( "update %sentities set container_guid = %d where guid = %d", get_config ( "dbprefix" ), $group_id, $guid ) );
 			}
 		}
 	}
@@ -462,8 +457,7 @@ function pleio_api_get_folders($group_id = 0, $folder_id = 0, $offset = 0) {
 			$options ["count"] = false;
 			$entities = elgg_get_entities_from_metadata ( $options );
 			foreach ( $entities as $entity ) {
-				$export = pleio_api_export ( $entity, 
-						array ("guid", "owner_guid", "container_guid", "site_guid", "title" ) );
+				$export = pleio_api_export ( $entity, array ("guid", "owner_guid", "container_guid", "site_guid", "title" ) );
 				$order = intval ( $entity->order );
 				while ( array_key_exists ( $order, $list ) ) {
 					$order ++;
@@ -488,9 +482,16 @@ function pleio_api_get_swordfish_files($user, $group_id, $swordfish_group, $fold
 	if ($result->ok) {
 		if (strpos ( $result->headers ["CONTENT-TYPE"], "json" )) {
 			foreach ( json_decode ( $result->response ) as $f ) {
-				$export = array ("guid" => $f->id, "type" => $f->isFolder ? "folder" : "file", "url" => $f->url, 
-						"name" => $f->filename, "title" => $f->name, "container_guid" => $group->guid, 
-						"site_guid" => $group->site_guid, "mimetype" => $f->contentType, "size" => $f->size, 
+				$export = array (
+						"guid" => $f->id, 
+						"type" => $f->isFolder ? "folder" : "file", 
+						"url" => $f->url, 
+						"name" => $f->filename, 
+						"title" => $f->name, 
+						"container_guid" => $group->guid, 
+						"site_guid" => $group->site_guid, 
+						"mimetype" => $f->contentType, 
+						"size" => $f->size, 
 						"can_edit" => $f->canDelete ? 1 : 0 );
 				$date = strtotime ( $f->date );
 				if ($date) {
@@ -533,15 +534,14 @@ function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $offse
 		if ($group_id) {
 			$wheres [] = sprintf ( "e.container_guid = %d", $group_id );
 		}
-			//		if ($folder_id) {
+		//		if ($folder_id) {
 		//			$more = elgg_get_entity_relationship_where_sql ( 'e.guid', 'folder_of', $folder_id ? $folder_id : null );
 		//			$wheres = array_merge ( $wheres, $more ["wheres"] );
 		//			$joins = array_merge ( $joins, $more ["joins"] );
 		//		}
 		// if we don't look in a folder (so in the root folder), we don't want files that are in a folder to show up here too 
 		$joins [] = sprintf ( 
-				"LEFT JOIN %sentity_relationships r on r.guid_two = e.guid and relationship = 'folder_of'", 
-				get_config ( "dbprefix" ) );
+				"LEFT JOIN %sentity_relationships r on r.guid_two = e.guid and relationship = 'folder_of'", get_config ( "dbprefix" ) );
 		$wheres [] = 'guid_one ' . ($folder_id ? ' = ' . $folder_id : 'IS NULL');
 		if ($user_id) {
 			$wheres [] = sprintf ( "e.owner_guid = %d", $user_id );
@@ -549,8 +549,7 @@ function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $offse
 			// friends
 			$friends = get_user_friends ( $user->guid, "", 999999, 0 );
 			if (sizeof ( $friends )) {
-				$wheres [] = " e.owner_guid IN (" . implode ( ",", 
-						array_map ( create_function ( '$user', 'return $user->guid;' ), $friends ) ) . ") ";
+				$wheres [] = " e.owner_guid IN (" . implode ( ",", array_map ( create_function ( '$user', 'return $user->guid;' ), $friends ) ) . ") ";
 			} else {
 				return array ("total" => 0, "list" => array (), "offset" => $offset );
 			}
@@ -560,8 +559,7 @@ function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $offse
 			$wheres [] = " (o.description LIKE '%%$search%%' OR o.title LIKE '%%$search%%') ";
 			$joins [] = sprintf ( "INNER JOIN %sobjects_entity o on e.guid = o.guid", get_config ( "dbprefix" ) );
 		}
-		$options = array ('type' => 'object', 'subtypes' => array ('file', 'folder' ), 'limit' => 20, 
-				'offset' => $offset, 'count' => true, "wheres" => $wheres, "joins" => $joins );
+		$options = array ('type' => 'object', 'subtypes' => array ('file', 'folder' ), 'limit' => 20, 'offset' => $offset, 'count' => true, "wheres" => $wheres, "joins" => $joins );
 		$total = elgg_get_entities ( $options );
 		if ($total) {
 			$options ["count"] = false;
@@ -571,9 +569,7 @@ function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $offse
 				if (! $site) {
 					$site = get_entity ( $item->site_guid );
 				}
-				$export = pleio_api_export ( $item, 
-						array ("guid", "time_created", "owner_guid", "container_guid", "title", "description", 
-								"site_guid" ) );
+				$export = pleio_api_export ( $item, array ("guid", "time_created", "owner_guid", "container_guid", "title", "description", "site_guid" ) );
 				$export ["type"] = $item->getSubType ();
 				if ($export ["type"] == "file" && $item instanceof ElggFile) {
 					$export = pleio_api_get_metadata ( $item->guid, $export );
@@ -583,8 +579,7 @@ function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $offse
 					unset ( $export ["filestore::filestore"] );
 					$export ["name"] = basename ( $export ["filename"] );
 					unset ( $export ["filename"] );
-					$export ["size"] = is_readable ( $item->getFilenameOnFilestore () ) ? filesize ( 
-							$item->getFilenameOnFilestore () ) : 0;
+					$export ["size"] = is_readable ( $item->getFilenameOnFilestore () ) ? filesize ( $item->getFilenameOnFilestore () ) : 0;
 					unset ( $export ["folder_guid"] );
 					unset ( $export ["smallthumb"] );
 					unset ( $export ["largethumb"] );
@@ -604,8 +599,7 @@ function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $offse
 	return array ("total" => $total, "list" => $list, "offset" => $offset );
 }
 
-function pleio_api_save_file($data = "", $file_name = "", $title = "", $description = "", $tags = "", $file_id = null, $folder_id = 0, 
-		$group_id = 0, $access_id = "", $wiki_id = "") {
+function pleio_api_save_file($data = "", $file_name = "", $title = "", $description = "", $tags = "", $file_id = null, $folder_id = 0, $group_id = 0, $access_id = "", $wiki_id = "") {
 	$file_id = $file_id ? $file_id : null;
 	$user = elgg_get_logged_in_user_entity ();
 	$user_id = $user !== false ? $user->guid : 0;
@@ -686,9 +680,9 @@ function pleio_api_save_file($data = "", $file_name = "", $title = "", $descript
 			remove_entity_relationships ( $file->guid, "folder_of", 1 );
 			add_entity_relationship ( $folder_id, "folder_of", $file->guid );
 		}
-		if (!$file_id)
-			add_to_river('river/object/file/create', 'create', $user_id, $file->guid);
-		return new SaveSuccessResult ( elgg_echo ( "file:saved" ), $file->guid ); 
+		if (! $file_id)
+			add_to_river ( 'river/object/file/create', 'create', $user_id, $file->guid );
+		return new SaveSuccessResult ( elgg_echo ( "file:saved" ), $file->guid );
 	}
 	return new ErrorResult ( elgg_echo ( "file:uploadfailed" ) );
 }
@@ -783,8 +777,7 @@ function pleio_api_get_swordfish_wikis($user, $group_id, $swordfish_group, $pare
 				$result = pleio_api_call_swordfish_api ( $swordfish_name, $url, "GET" );
 				$subwiki = pleio_api_swordfish_parse_get_page ( $result );
 				$title = $subwiki ["title"];
-				$list [] = array ("guid" => $id, "title" => $title, "container_guid" => $group->guid, 
-						"site_guid" => $group->site_guid, "parent_guid" => $parent_id );
+				$list [] = array ("guid" => $id, "title" => $title, "container_guid" => $group->guid, "site_guid" => $group->site_guid, "parent_guid" => $parent_id );
 			}
 		}
 	} else {
@@ -793,8 +786,7 @@ function pleio_api_get_swordfish_wikis($user, $group_id, $swordfish_group, $pare
 		if ($result->ok) {
 			if (strpos ( $result->headers ["CONTENT-TYPE"], "json" )) {
 				foreach ( json_decode ( $result->response ) as $f ) {
-					$list [] = array ("guid" => $f->id, "url" => $f->url, "title" => $f->name, 
-							"container_guid" => $group->guid, "site_guid" => $group->site_guid );
+					$list [] = array ("guid" => $f->id, "url" => $f->url, "title" => $f->name, "container_guid" => $group->guid, "site_guid" => $group->site_guid );
 				}
 			} else {
 				return new ErrorResult ( $result->headers ["BOBO-EXCEPTION-VALUE"] );
@@ -829,8 +821,7 @@ function pleio_api_get_sub_wikis($group_id = 0, $parent_id = 0, $user_id = 0, $o
 			$wheres [] = sprintf ( "e.container_guid = %d", $group_id );
 		}
 		if ($parent_id) {
-			$more = elgg_get_entity_metadata_where_sql ( 'e', 'metadata', null, null, 
-					array ("name" => "parent_guid", "value" => ( int ) $parent_id ) );
+			$more = elgg_get_entity_metadata_where_sql ( 'e', 'metadata', null, null, array ("name" => "parent_guid", "value" => ( int ) $parent_id ) );
 			$wheres = array_merge ( $wheres, $more ["wheres"] );
 			$joins = array_merge ( $joins, $more ["joins"] );
 		}
@@ -840,8 +831,7 @@ function pleio_api_get_sub_wikis($group_id = 0, $parent_id = 0, $user_id = 0, $o
 			// friends
 			$friends = get_user_friends ( $user->guid, "", 999999, 0 );
 			if (sizeof ( $friends )) {
-				$wheres [] = " e.owner_guid IN (" . implode ( ",", 
-						array_map ( create_function ( '$user', 'return $user->guid;' ), $friends ) ) . ") ";
+				$wheres [] = " e.owner_guid IN (" . implode ( ",", array_map ( create_function ( '$user', 'return $user->guid;' ), $friends ) ) . ") ";
 			} else {
 				return array ("total" => 0, "list" => array (), "offset" => $offset );
 			}
@@ -851,16 +841,21 @@ function pleio_api_get_sub_wikis($group_id = 0, $parent_id = 0, $user_id = 0, $o
 			$wheres [] = " (o.description LIKE '%%$search%%' OR o.title LIKE '%%$search%%') ";
 			$joins [] = sprintf ( "INNER JOIN %sobjects_entity o on e.guid = o.guid", get_config ( "dbprefix" ) );
 		}
-		$options = array ('type' => 'object', 'subtypes' => $parent_id ? array ('page_top', 'page' ) : 'page_top', 
-				'limit' => 20, 'offset' => $offset, 'count' => true, "wheres" => $wheres, "joins" => $joins );
+		$options = array (
+				'type' => 'object', 
+				'subtypes' => $parent_id ? array ('page_top', 'page' ) : 'page_top', 
+				'limit' => 20, 
+				'offset' => $offset, 
+				'count' => true, 
+				"wheres" => $wheres, 
+				"joins" => $joins );
 		$total = elgg_get_entities ( $options );
 		if ($total) {
 			$options ["count"] = false;
 			$options ["order_by"] = "e.time_created DESC";
 			$data = elgg_get_entities ( $options );
 			foreach ( $data as $item ) {
-				$export = pleio_api_export ( $item, 
-						array ("guid", "time_created", "owner_guid", "container_guid", "title", "site_guid" ) );
+				$export = pleio_api_export ( $item, array ("guid", "time_created", "owner_guid", "container_guid", "title", "site_guid" ) );
 				$export ["likes_count"] = pleio_api_fetch_likes ( $item->guid );
 				$list [] = $export;
 			}
@@ -956,7 +951,7 @@ function pleio_api_swordfish_parse_get_page($result, $swordfish_name) {
 			}
 		}
 		$export ["name"] = "";
-		$export ["access_id"] = $response->visibility == "private" ? 0 : 2	;
+		$export ["access_id"] = $response->visibility == "private" ? 0 : 2;
 		$export ["access_name"] = $response->visibility == "private" ? "Privé" : "Publiek";
 		$export ["write_access_name"] = "";
 		$export ["allow_comments"] = $response->commentAllowed ? "yes" : "no";
@@ -967,8 +962,7 @@ function pleio_api_swordfish_parse_get_page($result, $swordfish_name) {
 }
 
 function pleio_api_swordfish_extract_comments($content, $export) {
-	$content = preg_replace ( '/<div class="discreet">Commentaar is uitgeschakeld<\/div>\s*<\/div>\s*<\/div>/ism', "", 
-			$content );
+	$content = preg_replace ( '/<div class="discreet">Commentaar is uitgeschakeld<\/div>\s*<\/div>\s*<\/div>/ism', "", $content );
 	if (preg_match ( "/<div id=\"content\">(.*?)<\/div>\s*<div id=\"comments\">/ism", $content, $m )) {
 		$export ["description"] = $m [1];
 		$content = str_replace ( $m [1], "", $content );
@@ -997,8 +991,7 @@ function pleio_api_swordfish_extract_comments($content, $export) {
 	return $export;
 }
 
-function pleio_api_save_wiki($content = "", $title = "", $wiki_id = null, $parent_id = null, $group_id = 0, $access_id = 0, 
-		$write_access_id = 0) {
+function pleio_api_save_wiki($content = "", $title = "", $wiki_id = null, $parent_id = null, $group_id = 0, $access_id = 0, $write_access_id = 0) {
 	$wiki_id = $wiki_id ? $wiki_id : null;
 	$user = elgg_get_logged_in_user_entity ();
 	$user_id = $user !== false ? $user->guid : 0;
@@ -1078,8 +1071,8 @@ function pleio_api_save_wiki($content = "", $title = "", $wiki_id = null, $paren
 			return new ErrorResult ( elgg_echo ( "pages:error:no_save" ) );
 		}
 		$wiki->annotate ( 'page', $wiki->description, $wiki->access_id );
-		if (!$wiki_id)
-			add_to_river('river/object/page/create', 'create', $user_id, $wiki->guid);
+		if (! $wiki_id)
+			add_to_river ( 'river/object/page/create', 'create', $user_id, $wiki->guid );
 		return new SaveSuccessResult ( elgg_echo ( "pages:saved" ), $wiki->guid );
 	}
 }
@@ -1095,8 +1088,7 @@ function pleio_api_delete_wiki($wiki_id) {
 					$container = get_entity ( $page->container_guid );
 					// Bring all child elements forward
 					$parent = $page->parent_guid;
-					$children = elgg_get_entities_from_metadata ( 
-							array ('metadata_name' => 'parent_guid', 'metadata_value' => $page->getGUID () ) );
+					$children = elgg_get_entities_from_metadata ( array ('metadata_name' => 'parent_guid', 'metadata_value' => $page->getGUID () ) );
 					if ($children) {
 						foreach ( $children as $child ) {
 							$child->parent_guid = $parent;
@@ -1136,12 +1128,9 @@ function pleio_api_add_comment($guid, $comment) {
 		}
 		if ($entity->owner_guid != $user_id) {
 			notify_user ( $entity->owner_guid, $user->guid, elgg_echo ( 'generic_comment:email:subject' ), 
-					elgg_echo ( 'generic_comment:email:body', 
-							array ($entity->title, $user->name, $comment, $entity->getURL (), $user->name, 
-									$user->getURL () ) ) );
+					elgg_echo ( 'generic_comment:email:body', array ($entity->title, $user->name, $comment, $entity->getURL (), $user->name, $user->getURL () ) ) );
 		}
-		add_to_river ( 'river/annotation/generic_comment/create', 'comment', $user->guid, $entity->guid, "", 0, 
-				$annotation );
+		add_to_river ( 'river/annotation/generic_comment/create', 'comment', $user->guid, $entity->guid, "", 0, $annotation );
 		return new SuccessResult ( elgg_echo ( "generic_comment:posted" ) );
 	} else {
 		$swordfish_name = pleio_api_swordfish_username ( $user->username );
@@ -1208,12 +1197,19 @@ function pleio_api_get_messages($sent = 0, $search = "", $offset = 0) {
 			$sql = "select guid from " . get_config ( "dbprefix" ) . "users_entity where name like '%$search%' ";
 			$users = get_data ( $sql );
 			if (sizeof ( $users )) {
-				$users = array_map(function($u) { return $u->guid; }, $users);
+				$users = array_map(function($u) 
+				
+				
+				{
+					return $u->guid;
+				}, $users)
+				
+				
+				;
 				$users = implode ( ",", $users );
 				$searchSql = " OR (msn2.string = '" . ($sent ? "toId" : "fromId") . "' AND msv2.string in ($users)) ";
 				$searchJoin = " INNER JOIN " . get_config ( "dbprefix" ) . "metadata n_table2 on e.guid = n_table2.entity_guid  
-										INNER JOIN " . get_config ( 
-						"dbprefix" ) . "metastrings msn2 on n_table2.name_id = msn2.id  
+										INNER JOIN " . get_config ( "dbprefix" ) . "metastrings msn2 on n_table2.name_id = msn2.id  
 										INNER JOIN " . get_config ( "dbprefix" ) . "metastrings msv2 on n_table2.value_id = msv2.id ";
 			}
 			$searchSql .= ")";
@@ -1234,18 +1230,14 @@ function pleio_api_get_messages($sent = 0, $search = "", $offset = 0) {
 			AND e.enabled = 'yes' ";
 		$total = get_data_row ( sprintf ( $sql, "COUNT(e.guid) AS cnt", $user_id, $user_id ) );
 		$total = $total->cnt;
-		$data = get_data ( 
-				sprintf ( $sql, "DISTINCT e.*", $user_id, $user_id ) . sprintf ( 
-						"ORDER BY e.time_created DESC LIMIT %d, 20", $offset ) );
+		$data = get_data ( sprintf ( $sql, "DISTINCT e.*", $user_id, $user_id ) . sprintf ( "ORDER BY e.time_created DESC LIMIT %d, 20", $offset ) );
 		foreach ( $data as $row ) {
 			$message = entity_row_to_elggstar ( $row );
-			$export = pleio_api_export ( $message, 
-					array ("time_created", "guid", "owner_guid", "container_guid", "site_guid", "title", 
-							"description" ) );
+			$export = pleio_api_export ( $message, array ("time_created", "guid", "owner_guid", "container_guid", "site_guid", "title", "description" ) );
 			$export = pleio_api_get_metadata ( $message->guid, $export );
 			unset ( $export ["msg"] );
 			// filter links
-			$export["description"] = strip_tags(trim(preg_replace("/\w+:\/\/[\w\d\.\-_\?=&;:#\/]+/ism", "", $export["description"]), ": "));
+			$export ["description"] = strip_tags ( trim ( preg_replace ( "/\w+:\/\/[\w\d\.\-_\?=&;:#\/]+/ism", "", $export ["description"] ), ": " ) );
 			$u = false;
 			if ($export ["fromId"] == $user_id) {
 				$u = get_entity ( $export ["toId"] );
@@ -1356,40 +1348,32 @@ function pleio_api_swordfish_notify($username, $type, $event, $group_id, $subjec
 	$event = sanitise_string ( $event );
 	$group_id = sanitise_string ( $group_id );
 	$subject_id = sanitise_string ( $subject_id );
-	$group = elgg_get_entities_from_metadata ( 
-			array ('metadata_name' => "swordfish_group", 'metadata_value' => $group_id, 'site_guids' => ELGG_ENTITIES_ANY_VALUE ) );
+	$group = elgg_get_entities_from_metadata ( array ('metadata_name' => "swordfish_group", 'metadata_value' => $group_id, 'site_guids' => ELGG_ENTITIES_ANY_VALUE ) );
 	//var_dump ( $site, $group );
-	if (sizeof($group)) {
-		$group = array_pop($group);
+	if (sizeof ( $group )) {
+		$group = array_pop ( $group );
 	}
 	if (! $group)
 		return new ErrorResult ( elgg_echo ( 'pleio_api:swordfish_notify:unknown_group' ) );
-	
 	$site = get_entity ( $group->site_guid );
-
 	if (! $site)
 		return new ErrorResult ( elgg_echo ( 'pleio_api:swordfish_notify:unknown_site' ) );
-
-	$user = get_user_by_username ($username);		
-		
+	$user = get_user_by_username ( $username );
 	if (! $user)
 		return new ErrorResult ( elgg_echo ( 'pleio_api:swordfish_notify:unknown_user' ) );
-		
-	if (! $username || ! in_array ( $type, array ("wiki", "file" ) ) || ! in_array ( $event, 
-			array ("create", "update", "comment" ) ) || ! $group_id || ! $subject_id)
+	if (! $username || ! in_array ( $type, array ("wiki", "file" ) ) || ! in_array ( $event, array ("create", "update", "comment" ) ) || ! $group_id || ! $subject_id)
 		return new ErrorResult ( elgg_echo ( 'pleio_api:swordfish_notify:invalid' ) );
-		
 	$type = $type == "wiki" ? "page" : "file";
 	//$river_id = add_to_river('river/object/' . $type . '/' . $event, $event, $group->guid, $group->guid );
-//	$river_item = elgg_get_river(array('id' => $river_id));
-//	if (sizeof($river_item)) {
-//		$river_item = array_pop($river_item);
-////		$river_item->site_guid = $site->guid;
-////		$river_item->type = "object";
-////		$river_item->subtype = $type;
-////		$river_item->save(); 
-//	}
-//	return array($username, $type, $event, $group_id, $subject_id, pleio_api_export($site), pleio_api_export($group), pleio_api_export($user));
+	//	$river_item = elgg_get_river(array('id' => $river_id));
+	//	if (sizeof($river_item)) {
+	//		$river_item = array_pop($river_item);
+	////		$river_item->site_guid = $site->guid;
+	////		$river_item->type = "object";
+	////		$river_item->subtype = $type;
+	////		$river_item->save(); 
+	//	}
+	//	return array($username, $type, $event, $group_id, $subject_id, pleio_api_export($site), pleio_api_export($group), pleio_api_export($user));
 	return new SuccessResult ( elgg_echo ( 'pleio_api:swordfish_notify:success' ) );
 }
 
@@ -1402,8 +1386,7 @@ function pleio_api_swordfish_group_connect($group_id = 0, $swordfish_group_id = 
 	foreach ( get_group_members ( $group_id, 10, 0 ) as $member ) {
 		$url = pleio_api_swordfish_baseurl ( $group->site_guid ) . "add-user-to-group";
 		$swordfish_name = "pleio";
-		$params = array ("gid" => $swordfish_group_id, "userid" => pleio_api_swordfish_username ( $member->username ), 
-				"fullname" => $member->name, "email" => $member->email );
+		$params = array ("gid" => $swordfish_group_id, "userid" => pleio_api_swordfish_username ( $member->username ), "fullname" => $member->name, "email" => $member->email );
 		$result .= "," . $params ["userid"] . ":";
 		$r = pleio_api_call_swordfish_api ( $swordfish_name, $url, "POST", $params );
 		$result .= $r->ok ? "Y" : "N";
@@ -1415,8 +1398,14 @@ function pleio_api_get_contacts($offset = 0, $search = "") {
 	$offset = intval ( $offset );
 	$user = elgg_get_logged_in_user_entity ();
 	$user_id = $user !== false ? $user->guid : 0;
-	$options = array ('limit' => 100, 'offset' => $offset, 'relationship' => 'friend', 'relationship_guid' => $user_id, 
-			'types' => 'user', 'subtypes' => ELGG_ENTITIES_ANY_VALUE, 'count' => 1 );
+	$options = array (
+			'limit' => 100, 
+			'offset' => $offset, 
+			'relationship' => 'friend', 
+			'relationship_guid' => $user_id, 
+			'types' => 'user', 
+			'subtypes' => ELGG_ENTITIES_ANY_VALUE, 
+			'count' => 1 );
 	if ($search) {
 		$search = sanitise_string ( $search );
 		$options ['wheres'] = " name LIKE '%$search%' ";
@@ -1436,8 +1425,7 @@ function pleio_api_get_contact_requests($sent = 0, $search = "", $offset = 0) {
 	$user_id = $user !== false ? $user->guid : 0;
 	$sent = intval ( $sent );
 	$search = sanitise_string ( $search );
-	$options = array ("type" => "user", "limit" => false, "relationship" => "friendrequest", 
-			"relationship_guid" => $user_id, "count" => 1 );
+	$options = array ("type" => "user", "limit" => false, "relationship" => "friendrequest", "relationship_guid" => $user_id, "count" => 1 );
 	$options ["inverse_relationship"] = $sent == 0; //voor ontvangen verzoeken inverse relation ophalen
 	$total = elgg_get_entities_from_relationship ( $options );
 	$options ['count'] = 0;
@@ -1490,8 +1478,7 @@ function pleio_api_contact_request_respond($contact_id, $accept) {
 	if ($user && $contact && $removed) {
 		if ($accept == 1) {
 			if (user_add_friend ( $user->guid, $contact_id ) && user_add_friend ( $contact_id, $user->guid )) {
-				return new SuccessResult ( 
-						elgg_echo ( "friend_request:approve:successful", array ($contact->name ) ) );
+				return new SuccessResult ( elgg_echo ( "friend_request:approve:successful", array ($contact->name ) ) );
 			} else {
 				return new SuccessResult ( elgg_echo ( "friend_request:approve:fail", array ($contact->name ) ) );
 			}
@@ -1650,7 +1637,6 @@ function pleio_api_get_online_users() {
 function pleio_api_get_comments($guid = 0, $offset = 0) {
 	$user = elgg_get_logged_in_user_entity ();
 	$user_guid = $user !== false ? $user->guid : 0;
-	return array ("total" => pleio_api_fetch_comments ( $guid, $user_guid, $offset, 1 ), 
-			"list" => pleio_api_fetch_comments ( $guid, $user_guid, $offset ), "offset" => $offset );
+	return array ("total" => pleio_api_fetch_comments ( $guid, $user_guid, $offset, 1 ), "list" => pleio_api_fetch_comments ( $guid, $user_guid, $offset ), "offset" => $offset );
 }
 ?>

@@ -2,17 +2,17 @@
 
 function pleio_api_methods() {
 	return array (
-			'add_comment' => array ('method' => 'POST', 
-					'params' => array ('guid' => array ('type' => 'string' ), 'comment' => array ('type' => 'string' ) ) ), 
+			'add_comment' => array ('method' => 'POST', 'params' => array ('guid' => array ('type' => 'string' ), 'comment' => array ('type' => 'string' ) ) ), 
 			'add_contact' => array ('method' => 'POST', 'params' => array ('contact_id' => array ('type' => 'int' ) ) ), 
 			'add_contacts_by_email' => array ('method' => 'POST', 'params' => array ('emails' => array ('type' => 'string' ) ) ), 
-			'change_setting' => array ('method' => 'POST', 
-					'params' => array ('name' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
+			'change_setting' => array (
+					'method' => 'POST', 
+					'params' => array (
+							'name' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'password' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'language' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'email' => array ('type' => 'string', 'required' => false, 'default' => '' ) ) ), 
-			'contact_request_respond' => array ('method' => 'POST', 
-					'params' => array ('contact_id' => array ('type' => 'int' ), 'accept' => array ('type' => 'int' ) ) ), 
+			'contact_request_respond' => array ('method' => 'POST', 'params' => array ('contact_id' => array ('type' => 'int' ), 'accept' => array ('type' => 'int' ) ) ), 
 			'delete_comment' => array ('method' => 'POST', 'params' => array ('comment_id' => array ('type' => 'int' ) ) ), 
 			'delete_contact' => array ('method' => 'POST', 'params' => array ('contact_id' => array ('type' => 'int' ) ) ), 
 			'delete_file' => array ('method' => 'POST', 'params' => array ('file_id' => array ('type' => 'string' ) ) ), 
@@ -20,95 +20,96 @@ function pleio_api_methods() {
 			'delete_wiki' => array ('method' => 'POST', 'params' => array ('wiki_id' => array ('type' => 'string' ) ) ), 
 			'get_access_list' => array (), 
 			'get_activity' => array (
-					'params' => array ('group_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
+					'params' => array (
+							'group_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
 			'get_all_groups' => array (
-					'params' => array ('search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
+					'params' => array (
+							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => 0 ), 
 							'group_id' => array ('type' => 'int', 'required' => false, 'default' => 0 ) ) ), 
 			'get_all_subsites' => array (
-					'params' => array ('search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
+					'params' => array (
+							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'subsite_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
-							'locked_filter' => array ('type' => 'int', 'required' => false, 
-									'description' => '0 = alles, 1 = open, 2 = gesloten', 'default' => '' ), 
-							'order_by' => array ('type' => 'int', 'required' => false, 
-									'description' => '0 = geen, 1 = az, 2 = za', 'default' => '' ), 
+							'locked_filter' => array ('type' => 'int', 'required' => false, 'description' => '0 = alles, 1 = open, 2 = gesloten', 'default' => '' ), 
+							'order_by' => array ('type' => 'int', 'required' => false, 'description' => '0 = geen, 1 = az, 2 = za', 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
 			'get_button_names' => array ('params' => array () ), 
-			'get_comments' => array (
-					'params' => array ('guid' => array ('type' => 'int' ), 
-							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
+			'get_comments' => array ('params' => array ('guid' => array ('type' => 'int' ), 'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
 			'get_contact' => array ('params' => array ('contact_id' => array ('type' => 'int' ) ) ), 
 			'get_contact_requests' => array (
-					'params' => array ('sent' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
+					'params' => array (
+							'sent' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
 			'get_contacts' => array (
-					'params' => array ('offset' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
+					'params' => array (
+							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ) ) ), 
 			'get_file' => array ('method' => 'GET', 'params' => array ('file_id' => array ('type' => 'string' ) ) ), 
 			'get_files' => array (
-					'params' => array ('group_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
+					'params' => array (
+							'group_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'folder_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'user_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => 0 ), 
 							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
-							'filter' => array ('type' => 'int', 'required' => false, 'default' => 0, 
-									'description' => '0 = none, 1 = mine, 2 = friends' ) ) ), 
+							'filter' => array ('type' => 'int', 'required' => false, 'default' => 0, 'description' => '0 = none, 1 = mine, 2 = friends' ) ) ), 
 			'get_folders' => array (
-					'params' => array ('group_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
+					'params' => array (
+							'group_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'folder_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
 			'get_group' => array (
-					'params' => array ('group_id' => array ('type' => 'int' ), 
-							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
+					'params' => array ('group_id' => array ('type' => 'int' ), 'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
 			'get_group_icon' => array ('params' => array ('group_id' => array ('type' => 'int' ) ) ), 
 			'get_login' => array ('method' => 'GET' ), 
 			'get_messages' => array (
-					'params' => array ('sent' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
+					'params' => array (
+							'sent' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
 			'get_my_groups' => array (
-					'params' => array ('search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
+					'params' => array (
+							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => 0 ) ) ), 
 			'get_my_subsites' => array (
-					'params' => array ('search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
-							'locked_filter' => array ('type' => 'int', 'required' => false, 
-									'description' => '0 = alles, 1 = open, 2 = gesloten', 'default' => '' ), 
-							'order_by' => array ('type' => 'int', 'required' => false, 
-									'description' => '0 = geen, 1 = az, 2 = za', 'default' => '' ), 
+					'params' => array (
+							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
+							'locked_filter' => array ('type' => 'int', 'required' => false, 'description' => '0 = alles, 1 = open, 2 = gesloten', 'default' => '' ), 
+							'order_by' => array ('type' => 'int', 'required' => false, 'description' => '0 = geen, 1 = az, 2 = za', 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
 			'get_online_users' => array (), 
 			'get_tweios' => array (
-					'params' => array ('group_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
+					'params' => array (
+							'group_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'user_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
-							'filter' => array ('type' => 'int', 'required' => false, 
-									'description' => '0 = none, 1 = mine, 2 = friends', 'default' => '' ), 
+							'filter' => array ('type' => 'int', 'required' => false, 'description' => '0 = none, 1 = mine, 2 = friends', 'default' => '' ), 
 							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
 			'get_user' => array ('params' => array ('user_id' => array ('type' => 'int' ) ) ), 
 			'get_wiki' => array (
-					'params' => array ('wiki_id' => array ('type' => 'string' ), 
-							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
+					'params' => array ('wiki_id' => array ('type' => 'string' ), 'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
 			'get_wikis' => array (
-					'params' => array ('group_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
+					'params' => array (
+							'group_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'parent_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'user_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
-							'filter' => array ('type' => 'int', 'required' => false, 
-									'description' => '0 = none, 1 = mine, 2 = friends', 'default' => '' ) ) ), 
+							'filter' => array ('type' => 'int', 'required' => false, 'description' => '0 = none, 1 = mine, 2 = friends', 'default' => '' ) ) ), 
 			'join_group' => array ('params' => array ('group_id' => array ('type' => 'int' ) ) ), 
-			'join_subsite' => array (
-					'params' => array ('reason' => array ('type' => 'string', 'required' => false, 'default' => '' ) ) ), 
+			'join_subsite' => array ('params' => array ('reason' => array ('type' => 'string', 'required' => false, 'default' => '' ) ) ), 
 			'like_entity' => array ('method' => 'POST', 'params' => array ('guid' => array ('type' => 'string' ) ) ), 
-			'mark_message' => array ('method' => 'POST', 
-					'params' => array ('message_id' => array ('type' => 'int' ), 'read' => array ('type' => 'int' ) ) ), 
-			'report_contact' => array ('method' => 'POST', 
-					'params' => array ('contact_id' => array ('type' => 'int' ), 
-							'report_content' => array ('type' => 'string' ) ) ), 
-			'save_file' => array ('method' => 'POST', 
-					'params' => array ('data' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
+			'mark_message' => array ('method' => 'POST', 'params' => array ('message_id' => array ('type' => 'int' ), 'read' => array ('type' => 'int' ) ) ), 
+			'report_contact' => array (
+					'method' => 'POST', 
+					'params' => array ('contact_id' => array ('type' => 'int' ), 'report_content' => array ('type' => 'string' ) ) ), 
+			'save_file' => array (
+					'method' => 'POST', 
+					'params' => array (
+							'data' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'file_name' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'title' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'description' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
@@ -118,38 +119,44 @@ function pleio_api_methods() {
 							'group_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'access_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'wiki_id' => array ('type' => 'string', 'required' => false, 'default' => '' ) ) ), 
-			'save_wiki' => array ('method' => 'POST', 
-					'params' => array ('content' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
+			'save_wiki' => array (
+					'method' => 'POST', 
+					'params' => array (
+							'content' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'title' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'wiki_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'parent_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'group_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'access_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'write_access_id' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
-			'send_message' => array ('method' => 'POST', 
-					'params' => array ('contact_id' => array ('type' => 'int' ), 
+			'send_message' => array (
+					'method' => 'POST', 
+					'params' => array (
+							'contact_id' => array ('type' => 'int' ), 
 							'message_title' => array ('type' => 'string' ), 
 							'message_content' => array ('type' => 'string' ), 
 							'reply' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
-			'send_tweio' => array ('method' => 'POST', 
-					'params' => array ('message' => array ('type' => 'string' ), 'access_id' => array ('type' => 'int' ), 
+			'send_tweio' => array (
+					'method' => 'POST', 
+					'params' => array (
+							'message' => array ('type' => 'string' ), 
+							'access_id' => array ('type' => 'int' ), 
 							'reply' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'group_id' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
-			'swordfish_group_connect' => array (
-					'params' => array ('group_id' => array ('type' => 'int' ), 
-							'swordfish_group_id' => array ('type' => 'string' ) ) ), 
-			'swordfish_notify' => array ( 'method' => 'POST', "login_required" => false,
-					'params' => array ('username' => array ('type' => 'string', 'default' => '' ),
-							'type' => array ('type' => 'string', 'default' => '' ),
-							'event' => array ('type' => 'string', 'default' => '' ),
-							'group_id' => array ('type' => 'string', 'default' => '' ),
+			'swordfish_group_connect' => array ('params' => array ('group_id' => array ('type' => 'int' ), 'swordfish_group_id' => array ('type' => 'string' ) ) ), 
+			'swordfish_notify' => array (
+					'method' => 'POST', 
+					"login_required" => false, 
+					'params' => array (
+							'username' => array ('type' => 'string', 'default' => '' ), 
+							'type' => array ('type' => 'string', 'default' => '' ), 
+							'event' => array ('type' => 'string', 'default' => '' ), 
+							'group_id' => array ('type' => 'string', 'default' => '' ), 
 							'subject_id' => array ('type' => 'string', 'default' => '' ) ) ), 
-			'swordfish_site_connect' => array (
-					'params' => array ('subsite_id' => array ('type' => 'int' ), 
-							'swordfish_api_url' => array ('type' => 'string' ) ) ), 
-			'update_device_token' => array ('method' => 'POST', 
-					'params' => array ('device_token' => array ('type' => 'string', 'default' => '' ), 
-							'device' => array ('type' => 'string', 'default' => '' ) ) ) );
+			'swordfish_site_connect' => array ('params' => array ('subsite_id' => array ('type' => 'int' ), 'swordfish_api_url' => array ('type' => 'string' ) ) ), 
+			'update_device_token' => array (
+					'method' => 'POST', 
+					'params' => array ('device_token' => array ('type' => 'string', 'default' => '' ), 'device' => array ('type' => 'string', 'default' => '' ) ) ) );
 }
 
 function pleio_api_expose_functions() {
@@ -160,8 +167,7 @@ function pleio_api_expose_functions() {
 		$info ["login_required"] = isset ( $info ["login_required"] ) ? $info ["login_required"] : true;
 		$public_method = isset ( $info ["public_method"] ) ? $info ["public_method"] : "pleio." . $method;
 		$private_function = isset ( $info ["private_function"] ) ? $info ["private_function"] : "pleio_api_" . $method;
-		expose_function ( $public_method, $private_function, $info ["params"], $info ["description"], $info ["method"], true, 
-				$info ["login_required"] );
+		expose_function ( $public_method, $private_function, $info ["params"], $info ["description"], $info ["method"], true, $info ["login_required"] );
 	}
 }
 
@@ -334,8 +340,7 @@ function pleio_api_format_user(ElggUser $user, $token = null) {
 	foreach ( $meta as $m ) {
 		if ($m->site_guid != 1) {
 			$custom = elgg_get_entities ( 
-					array ("type" => "object", "subtype" => CUSTOM_PROFILE_FIELDS_PROFILE_SUBTYPE, "limit" => false, 
-							"site_guid" => $m->site_guid ) );
+					array ("type" => "object", "subtype" => CUSTOM_PROFILE_FIELDS_PROFILE_SUBTYPE, "limit" => false, "site_guid" => $m->site_guid ) );
 			foreach ( $custom as $f ) {
 				if ($f->metadata_name == $m->name) {
 					if ($f->metadata_type == "email" && $f->admin_only == 'no') {
@@ -352,8 +357,7 @@ function pleio_api_format_user(ElggUser $user, $token = null) {
 	if (isset ( $metadata ["icontime"] )) {
 		$path = get_config ( "dataroot" ) . date ( 'Y/m/d/', $user->time_created ) . $user->guid;
 		if (file_exists ( $path )) {
-			$export ["avatar"] = get_config ( "wwwroot" ) . sprintf ( 
-					"mod/profile/icondirect.php?lastcache=%d&joindate=%d&guid=%d&size=medium", $metadata ["icontime"], 
+			$export ["avatar"] = get_config ( "wwwroot" ) . sprintf ( "mod/profile/icondirect.php?lastcache=%d&joindate=%d&guid=%d&size=medium", $metadata ["icontime"], 
 					$user->time_created, $user->guid );
 		}
 	}
@@ -372,8 +376,7 @@ function pleio_api_format_user(ElggUser $user, $token = null) {
 }
 
 function pleio_api_fetch_comments($guid = 0, $user_guid = 0, $offset = 0, $count = false, $limit = 5) {
-	$options = array ('guid' => $guid, 'annotation_name' => "generic_comment", 'limit' => $limit, 'offset' => $offset, 
-			'count' => 1 );
+	$options = array ('guid' => $guid, 'annotation_name' => "generic_comment", 'limit' => $limit, 'offset' => $offset, 'count' => 1 );
 	if ($count) {
 		return elgg_get_annotations ( $options );
 	} else {
@@ -391,8 +394,14 @@ function pleio_api_format_comment(ElggAnnotation $a, $user_guid = 0) {
 	$u = get_entity ( $a->owner_guid );
 	$u = pleio_api_format_user ( $u );
 	$edit = can_edit_extender ( $a->id, "annotation", $user_guid );
-	return array ("guid" => ( int ) $a->id, "owner_guid" => $a->owner_guid, "description" => trim ( $a->value ), 
-			"time_created" => $a->time_created, "avatar" => $u ["avatar"], "name" => $u ["name"], "can_edit" => $edit ? 1 : 0 );
+	return array (
+			"guid" => ( int ) $a->id, 
+			"owner_guid" => $a->owner_guid, 
+			"description" => trim ( $a->value ), 
+			"time_created" => $a->time_created, 
+			"avatar" => $u ["avatar"], 
+			"name" => $u ["name"], 
+			"can_edit" => $edit ? 1 : 0 );
 }
 
 function pleio_api_format_activity($item) {
@@ -435,15 +444,22 @@ function pleio_api_format_activity($item) {
 				$message = "maakte";
 			}
 		}
-		return array ("id" => $item->id, "s" => array ("id" => $item->subject_guid, "name" => $subject_link ), 
-				"o" => array ("id" => $item->object_guid, "name" => $object_link ), "a" => $action, "type" => $type, 
-				"m" => trim ( $message ), "t" => $item->posted, "avatar" => $avatar, "d" => $description );
+		return array (
+				"id" => $item->id, 
+				"s" => array ("id" => $item->subject_guid, "name" => $subject_link ), 
+				"o" => array ("id" => $item->object_guid, "name" => $object_link ), 
+				"a" => $action, 
+				"type" => $type, 
+				"m" => trim ( $message ), 
+				"t" => $item->posted, 
+				"avatar" => $avatar, 
+				"d" => $description );
 	}
 }
 
 function pleio_api_swordfish_login($user_id, $ip, $expiry_time = 0) {
 	$shared_key = elgg_get_plugin_setting ( "swordfish_api_shared_key", "pleio_api" );
-//	var_dump($shared_key);
+	//	var_dump($shared_key);
 	$expiry_time = $expiry_time ? $expiry_time : time () + 3600;
 	$hash = hash_hmac ( "SHA256", $user_id . $expiry_time . $ip, $shared_key );
 	return "__pleio_ac=" . $user_id . "&" . $expiry_time . "&" . $ip . "&" . $hash;
@@ -461,7 +477,7 @@ function pleio_api_call_swordfish_api($sw_user, $url, $method = "GET", $data = a
 	} elseif ($postdata) {
 		$url .= "?" . $postdata;
 	}
-//	var_dump($url, $postdata, $headers);
+	//	var_dump($url, $postdata, $headers);
 	$http_opts ["header"] = implode ( "\r\n", $headers );
 	$opts = array ('http' => $http_opts );
 	$context = stream_context_create ( $opts );
@@ -528,8 +544,7 @@ function pleio_api_users_with_access_device_token($river) {
 	$wheres = array ();
 	$joins = array ();
 	// don't return same object or subject
-	$wheres [] = sprintf ( "e.guid NOT IN (%d, %d, %d, %d)", $object->guid, $object->owner_guid, $subject->guid, 
-			$subject->owner_guid );
+	$wheres [] = sprintf ( "e.guid NOT IN (%d, %d, %d, %d)", $object->guid, $object->owner_guid, $subject->guid, $subject->owner_guid );
 	$site_guid = $object->site_guid;
 	// override site_guid if object is site_guid
 	if ($object instanceof Subsite || $object instanceof ElggSite) {
@@ -541,8 +556,7 @@ function pleio_api_users_with_access_device_token($river) {
 		case ACCESS_DEFAULT :
 		case ACCESS_LOGGED_IN :
 		case ACCESS_PUBLIC :
-			if ($object && $object->container_guid && $object->container_guid != $object->owner_guid && $container = get_entity ( 
-					$object->container_guid ) && $container instanceof ElggGroup) {
+			if ($object && $object->container_guid && $object->container_guid != $object->owner_guid && $container = get_entity ( $object->container_guid ) && $container instanceof ElggGroup) {
 				$more = elgg_get_entity_relationship_where_sql ( 'e.guid', 'member', $object->container_guid, 1 );
 			} else {
 				$more = elgg_get_entity_relationship_where_sql ( 'e.guid', 'member_of_site', $site_guid, 1 );
@@ -552,10 +566,10 @@ function pleio_api_users_with_access_device_token($river) {
 			$more = elgg_get_entity_relationship_where_sql ( 'e.guid', 'friend', $object->owner_guid, 1 );
 			break;
 		case ACCESS_PRIVATE :
-			return array();
+			return array ();
 		default :
-			$users = get_members_of_access_collection($object->access_id, 1); 
-			$wheres [] = "e.guid IN (".implode(", ", $users).")"; 
+			$users = get_members_of_access_collection ( $object->access_id, 1 );
+			$wheres [] = "e.guid IN (" . implode ( ", ", $users ) . ")";
 	}
 	if ($more) {
 		$wheres = array_merge ( $wheres, $more ["wheres"] );
@@ -568,12 +582,10 @@ function pleio_api_users_with_access_device_token($river) {
 							'operand' => 'IS NOT NULL AND 1 = ' ) ) );
 	$wheres = array_merge ( $wheres, $more ["wheres"] );
 	$joins = array_merge ( $joins, $more ["joins"] );
-	$options = array ('type' => 'user', 'limit' => 100, 'wheres' => $wheres, 'joins' => $joins, 
-			'site_guid' => ELGG_ENTITIES_ANY_VALUE );
+	$options = array ('type' => 'user', 'limit' => 100, 'wheres' => $wheres, 'joins' => $joins, 'site_guid' => ELGG_ENTITIES_ANY_VALUE );
 	$users = elgg_get_entities ( $options );
 	foreach ( $users as $user ) {
-		$list [$user->guid] = array ("device_token" => $user->getPrivateSetting ( 'device_token' ), 
-				"device" => $user->getPrivateSetting ( 'device' ) );
+		$list [$user->guid] = array ("device_token" => $user->getPrivateSetting ( 'device_token' ), "device" => $user->getPrivateSetting ( 'device' ) );
 	}
 	return $list;
 }
@@ -583,8 +595,7 @@ function pleio_api_create_apns_message($txt, $device_token, $type, $object = nul
 	$m = array ("aps" => array ('alert' => $txt, 'sound' => 'default' ) );
 	$m ['info'] = $info;
 	$payload = json_encode ( $m );
-	$apnsMessage = chr ( 0 ) . chr ( 0 ) . chr ( 32 ) . pack ( 'H*', str_replace ( ' ', '', $device_token ) ) . chr ( 0 ) . chr ( 
-			strlen ( $payload ) ) . $payload;
+	$apnsMessage = chr ( 0 ) . chr ( 0 ) . chr ( 32 ) . pack ( 'H*', str_replace ( ' ', '', $device_token ) ) . chr ( 0 ) . chr ( strlen ( $payload ) ) . $payload;
 	return $apnsMessage;
 }
 
@@ -642,14 +653,12 @@ function pleio_api_push_handle_river_id($river_id, $apnsMessages = array(), $gcm
 					$gcmRegistrationIds [] = $info ["device_token"];
 					$gcmUserGuids [] = $to_guid;
 				} else {
-					$apnsMessages [$to_guid] = pleio_api_create_apns_message ( $txt, $info ["device_token"], $river->type, 
-							$object );
+					$apnsMessages [$to_guid] = pleio_api_create_apns_message ( $txt, $info ["device_token"], $river->type, $object );
 				}
-				system_log($object, $info["device"] . " " . $info ["device_token"]);
+				system_log ( $object, $info ["device"] . " " . $info ["device_token"] );
 			}
 			if (sizeof ( $gcmRegistrationIds )) {
-				$gcmMessages [] = array ('registration_ids' => $gcmRegistrationIds, 'data' => $gcmMessage, 
-						'user_guids' => $gcmUserGuids );
+				$gcmMessages [] = array ('registration_ids' => $gcmRegistrationIds, 'data' => $gcmMessage, 'user_guids' => $gcmUserGuids );
 			}
 		}
 	}
@@ -667,11 +676,9 @@ function pleio_api_push_handle_message_to($message, $apnsMessages = array(), $gc
 		}
 		if (strpos ( $info ["device"], "Android" ) !== false) {
 			$gcmMessage = pleio_api_create_gcm_message ( $txt, $message->message_type, $object );
-			$gcmMessages [] = array ('registration_ids' => $device_token, 'data' => $gcmMessage, 
-					'user_guids' => $message->to_guid );
+			$gcmMessages [] = array ('registration_ids' => $device_token, 'data' => $gcmMessage, 'user_guids' => $message->to_guid );
 		} else {
-			$apnsMessages [$message->to_guid] = pleio_api_create_apns_message ( $txt, $device_token, $message->message_type, 
-					$object );
+			$apnsMessages [$message->to_guid] = pleio_api_create_apns_message ( $txt, $device_token, $message->message_type, $object );
 		}
 	}
 	return array ($apnsMessages, $gcmMessages );
@@ -681,16 +688,16 @@ function pleio_api_push_apns_messages($apnsMessages = array()) {
 	if (! sizeof ( $apnsMessages ))
 		return;
 	$error = 0;
-	$errorString = "";	
+	$errorString = "";
 	$dataroot = get_config ( "dataroot" );
 	$apnsCert = $dataroot . "pleio_api/ios_push_certificate.pem";
-	if (!file_exists($apnsCert))
-		return;	
-	//$apnsCert = elgg_get_plugins_path () . "pleio_api/apns.pem";
+	if (! file_exists ( $apnsCert ))
+		return;
+		//$apnsCert = elgg_get_plugins_path () . "pleio_api/apns.pem";
 	$apnsHost = 'gateway.push.apple.com:2195';
 	$streamContext = stream_context_create ();
 	stream_context_set_option ( $streamContext, 'ssl', 'local_cert', $apnsCert );
-//	set_time_limit ( 5 );
+	//	set_time_limit ( 5 );
 	$apns = stream_socket_client ( 'ssl://' . $apnsHost, $error, $errorString, 5, STREAM_CLIENT_CONNECT, $streamContext );
 	if ($apns) {
 		foreach ( $apnsMessages as $apnsMessage ) {
@@ -745,13 +752,11 @@ function pleio_api_create_object_handler($event, $object_type, $object) {
 		switch ($object->getSubType ()) {
 			case "messages" :
 				if ($object->owner_guid == $object->toId) {
-					pleio_api_queue_push_message ( $object->toId, $object->fromId, "messages:email:subject", $object_type, 
-							$object->guid );
+					pleio_api_queue_push_message ( $object->toId, $object->fromId, "messages:email:subject", $object_type, $object->guid );
 				}
 				break;
 			case "friendrequest" :
-				pleio_api_queue_push_message ( $object->guid_two, $object->guid_one, "friend_request:newfriend:subject", 
-						$object_type, $object->guid_one );
+				pleio_api_queue_push_message ( $object->guid_two, $object->guid_one, "friend_request:newfriend:subject", $object_type, $object->guid_one );
 				break;
 			default :
 				break;
@@ -764,11 +769,11 @@ function pleio_api_create_object_handler($event, $object_type, $object) {
 
 function pleio_api_queue_push_message_for_river($river) {
 	if ($river instanceof ElggRiverItem) {
-		$object = $river->getObjectEntity();
+		$object = $river->getObjectEntity ();
 		if ($object) {
 			if ($object->site_guid == "1" && $object->container_guid) {
-				$container = $object->getContainerEntity();
-				if (!($container instanceof ElggGroup)) {
+				$container = $object->getContainerEntity ();
+				if (! ($container instanceof ElggGroup)) {
 					return false;
 				}
 			}
@@ -776,17 +781,20 @@ function pleio_api_queue_push_message_for_river($river) {
 			$valid_subtypes = array ("file", "page", "page_top", "subsite", "thewire", "plugin" );
 			if (in_array ( $object->getType (), $valid_types ) || in_array ( $object->getSubtype (), $valid_subtypes )) {
 				$message = new ElggObject ( );
-				$message->subtype = 'push_message_queue';
-				$message->river_id = $river->id;
-				return $message->save ();
+				try {					
+					$message->subtype = 'push_message_queue';
+					$message->river_id = $river->id;
+					return $message->save ();
+				} catch (Exception $ex) { 
+					system_log ( $message, "pleio_api_queue_push_message_for_river failed");					
+				}
 			}
 		}
 	}
 	return false;
 }
 
-function pleio_api_queue_push_message($to_guid, $from_guid, $message, $object_type, $object_guid = 0, $site_guid = 0, 
-		$container_guid = 0) {
+function pleio_api_queue_push_message($to_guid, $from_guid, $message, $object_type, $object_guid = 0, $site_guid = 0, $container_guid = 0) {
 	$to = get_user ( $to_guid );
 	if ($to) {
 		$device_token = get_private_setting ( $to->guid, "device_token" );
@@ -811,60 +819,64 @@ function pleio_api_queue_push_message($to_guid, $from_guid, $message, $object_ty
 	}
 }
 
-function pleio_api_handle_push_queue() {	
-	$max_messages = 300;
-	set_time_limit ( 59 );
-	elgg_set_ignore_access ( 1 );
-	$messages = elgg_get_entities ( 
-			array ('types' => 'object', 'subtypes' => 'push_message_queue', 'site_guid' => ELGG_ENTITIES_ANY_VALUE, 
-					'order_by' => 'e.time_created asc' /*send older messages first*/, 'limit' => $max_messages ) );
-	$apnsMessages = array ();
-	$gcmMessages = array ();
-	if ($messages) {
-		foreach ( $messages as $message ) {
-			if ($message->river_id) {
-				list ( $apnsMessages, $gcmMessages ) = pleio_api_push_handle_river_id ( $message->river_id, $apnsMessages, 
-						$gcmMessages );
-			} else {
-				list ( $apnsMessages, $gcmMessages ) = pleio_api_push_handle_message_to ( $message, $apnsMessages, 
-						$gcmMessages );
+function pleio_api_handle_push_queue() {
+	$site_guid = get_config ( "site_id" );
+	if ($site_guid == 1) { // pleio.nl only, handles all subsites
+		$max_messages = 300;
+		set_time_limit ( 59 );
+		elgg_set_ignore_access ( 1 );
+		$messages = elgg_get_entities ( 
+				array (
+						'types' => 'object', 
+						'subtypes' => 'push_message_queue', 
+						'site_guid' => ELGG_ENTITIES_ANY_VALUE, 
+						'order_by' => 'e.time_created asc' /*send older messages first*/, 'limit' => $max_messages ) );
+		$apnsMessages = array ();
+		$gcmMessages = array ();
+		if ($messages) {
+			foreach ( $messages as $message ) {
+				if ($message->river_id) {
+					list ( $apnsMessages, $gcmMessages ) = pleio_api_push_handle_river_id ( $message->river_id, $apnsMessages, $gcmMessages );
+				} else {
+					list ( $apnsMessages, $gcmMessages ) = pleio_api_push_handle_message_to ( $message, $apnsMessages, $gcmMessages );
+				}
+				system_log ( $message, 'handled apns:' . sizeof ( $apnsMessages ) . ' gcm:' . sizeof ( $gcmMessages ) );
+				$message->delete ();
 			}
-			system_log ( $message, 'handled apns:' . sizeof ( $apnsMessages ) . ' gcm:' . sizeof ( $gcmMessages ) );
-			$message->delete ();
 		}
+		if (sizeof ( $apnsMessages )) {
+			pleio_api_push_apns_messages ( $apnsMessages );
+		}
+		if (sizeof ( $gcmMessages )) {
+			pleio_api_push_gcm_messages ( $gcmMessages );
+		}
+		elgg_set_ignore_access ( 0 );
+		return sizeof ( $apnsMessages ) + sizeof ( $gcmMessages );
 	}
-	if (sizeof ( $apnsMessages )) {
-		pleio_api_push_apns_messages ( $apnsMessages );
-	}
-	if (sizeof ( $gcmMessages )) {
-		pleio_api_push_gcm_messages ( $gcmMessages );
-	}
-	elgg_set_ignore_access ( 0 );
-	return sizeof ( $apnsMessages ) + sizeof ( $gcmMessages );
 }
 
 function pleio_api_save_mobile_logo($logo_contents) {
 	$dataroot = get_config ( "dataroot" );
-	$site_guid = get_config ( "site_id" );	
-	if(!empty($logo_contents)){
+	$site_guid = get_config ( "site_id" );
+	if (! empty ( $logo_contents )) {
 		$path = $dataroot . "pleio_api/mobile_logos/";
-		if(!is_dir($path)){
-			mkdir($path, 0755, true);
-		}			
-		return file_put_contents($path . "logo_" . $site_guid, $logo_contents);
-	}		
+		if (! is_dir ( $path )) {
+			mkdir ( $path, 0755, true );
+		}
+		return file_put_contents ( $path . "logo_" . $site_guid, $logo_contents );
+	}
 	return false;
 }
 
 function pleio_api_save_ios_push_certificate($contents) {
 	$dataroot = get_config ( "dataroot" );
-	$site_guid = get_config ( "site_id" );	
-	if(!empty($contents)){
+	$site_guid = get_config ( "site_id" );
+	if (! empty ( $contents )) {
 		$path = $dataroot . "pleio_api";
-		if(!is_dir($path)){
-			mkdir($path, 0755, true);
-		}			
-		return file_put_contents($path . "/ios_push_certificate.pem", $contents);
-	}		
+		if (! is_dir ( $path )) {
+			mkdir ( $path, 0755, true );
+		}
+		return file_put_contents ( $path . "/ios_push_certificate.pem", $contents );
+	}
 	return false;
 }
