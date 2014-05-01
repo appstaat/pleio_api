@@ -781,12 +781,12 @@ function pleio_api_queue_push_message_for_river($river) {
 			$valid_subtypes = array ("file", "page", "page_top", "subsite", "thewire", "plugin" );
 			if (in_array ( $object->getType (), $valid_types ) || in_array ( $object->getSubtype (), $valid_subtypes )) {
 				$message = new ElggObject ( );
-				try {					
+				try {	 
 					$message->subtype = 'push_message_queue';
 					$message->river_id = $river->id;
-					return $message->save ();
+					return $message->save ();					
 				} catch (Exception $ex) { 
-					system_log ( $message, "pleio_api_queue_push_message_for_river failed");					
+					error_log("pleio_api_queue_push_message_for_river failed for river $river->id: " . $ex->getMessage());					
 				}
 			}
 		}
