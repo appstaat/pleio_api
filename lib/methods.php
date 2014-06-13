@@ -574,7 +574,7 @@ function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $offse
 				if ($export ["type"] == "file" && $item instanceof ElggFile) {
 					$export = pleio_api_get_metadata ( $item->guid, $export );
 					unset ( $export ["originalfilename"] );
-					unset ( $export ["simpletype"] );
+					//unset ( $export ["simpletype"] );
 					unset ( $export ["filestore::dir_root"] );
 					unset ( $export ["filestore::filestore"] );
 					$export ["name"] = basename ( $export ["filename"] );
@@ -599,7 +599,7 @@ function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $offse
 	return array ("total" => $total, "list" => $list, "offset" => $offset );
 }
 
-function pleio_api_save_file($data = "", $file_name = "", $title = "", $description = "", $tags = "", $file_id = null, $folder_id = 0, $group_id = 0, $access_id = "", $wiki_id = "") {
+function pleio_api_save_file($data = "", $file_name = "", $title = "", $description = "", $tags = "", $file_id = null, $folder_id = 0, $group_id = 0, $access_id = "", $wiki_id = "", $mimetype = "") {
 	$file_id = $file_id ? $file_id : null;
 	$user = elgg_get_logged_in_user_entity ();
 	$user_id = $user !== false ? $user->guid : 0;
@@ -671,7 +671,11 @@ function pleio_api_save_file($data = "", $file_name = "", $title = "", $descript
 				$file->write ( $data );
 				$file->close ();
 			}
-			$file->setMimeType ( $file->detectMimeType ( $file->getFilenameOnFilestore () ) );
+			if (!$mimetype) {
+				$mimetype = $file->detectMimeType ( $file->getFilenameOnFilestore () );
+			}
+			$file->setMimeType ( $mimetype );
+			$file->simpletype = file_get_simple_type($mimetype);			
 		}
 		if (! $file->save ()) {
 			return new ErrorResult ( elgg_echo ( "file:uploadfailed" ) );

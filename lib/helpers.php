@@ -118,7 +118,8 @@ function pleio_api_methods() {
 							'folder_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'group_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'access_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
-							'wiki_id' => array ('type' => 'string', 'required' => false, 'default' => '' ) ) ), 
+							'wiki_id' => array ('type' => 'string', 'required' => false, 'default' => '' ),
+							'mimetype' => array ('type' => 'string', 'required' => false, 'default' => '' ) ) ), 
 			'save_wiki' => array (
 					'method' => 'POST', 
 					'params' => array (
@@ -556,13 +557,22 @@ function pleio_api_users_with_access_device_token($river) {
 		case ACCESS_DEFAULT :
 		case ACCESS_LOGGED_IN :
 		case ACCESS_PUBLIC :
-			if ($object && $object->container_guid && $object->container_guid != $object->owner_guid && $container = get_entity ( $object->container_guid ) && $container instanceof ElggGroup) {
+			if ($object->type == "user") {
+				//only friends $object->guid
+				$more = elgg_get_entity_relationship_where_sql ( 'e.guid', 'friend', $object->guid, 1 );				
+			} elseif ($object && $object->container_guid && $object->container_guid != $object->owner_guid && $container = get_entity ( $object->container_guid ) && $container instanceof ElggGroup) {
+				// only group $object->container_guid
 				$more = elgg_get_entity_relationship_where_sql ( 'e.guid', 'member', $object->container_guid, 1 );
-			} else {
+			} elseif ($site_guid > 1) {
+				//only subsite $site_guid
 				$more = elgg_get_entity_relationship_where_sql ( 'e.guid', 'member_of_site', $site_guid, 1 );
+			} else {
+				// pleio has too many users to update everyone, so only friends $object->owner_guid
+				$more = elgg_get_entity_relationship_where_sql ( 'e.guid', 'friend', $object->owner_guid, 1 );
 			}
 			break;
 		case ACCESS_FRIENDS :
+			//only friends $object->owner_guid
 			$more = elgg_get_entity_relationship_where_sql ( 'e.guid', 'friend', $object->owner_guid, 1 );
 			break;
 		case ACCESS_PRIVATE :
@@ -630,7 +640,7 @@ function pleio_api_push_handle_river_id($river_id, $apnsMessages = array(), $gcm
 	list ( $river ) = elgg_get_river ( array ("id" => $river_id, 'site_guid' => ELGG_ENTITIES_ANY_VALUE ) );
 	if ($river) {
 		$users = pleio_api_users_with_access_device_token ( $river );
-		if (sizeof ( $users )) {
+		if (sizeof ( $users )) {			
 			$subject = $river->getSubjectEntity ();
 			$object = $river->getObjectEntity ();
 			$subject_link = $subject->name;
@@ -640,7 +650,11 @@ function pleio_api_push_handle_river_id($river_id, $apnsMessages = array(), $gcm
 			$subtype = $river->subtype ? $river->subtype : 'default';
 			$m = "river:$action:$type:$subtype";
 			$item = pleio_api_format_activity ( $river );
-			$txt = trim ( sprintf ( "%s %s %s", $item ["s"] ["name"], $item ["m"], $item ["o"] ["name"] ) );
+			if ($item ["s"] ["name"] != $item ["s"] ["name"]) {
+				$txt = trim ( sprintf ( "%s %s %s", $item ["s"] ["name"], $item ["m"], $item ["o"] ["name"] ) );
+			} else {
+				$txt = trim ( sprintf ( "%s %s  ", $item ["s"] ["name"], $item ["m"] ) );
+			}
 			//$txt = elgg_echo ( $m, array ( $subject_link, $object_link ), 'nl' );
 			if ($object && $object->container_guid == $subject->guid) {
 				unset ( $object->container_guid );
@@ -655,7 +669,6 @@ function pleio_api_push_handle_river_id($river_id, $apnsMessages = array(), $gcm
 				} else {
 					$apnsMessages [$to_guid] = pleio_api_create_apns_message ( $txt, $info ["device_token"], $river->type, $object );
 				}
-				system_log ( $object, $info ["device"] . " " . $info ["device_token"] );
 			}
 			if (sizeof ( $gcmRegistrationIds )) {
 				$gcmMessages [] = array ('registration_ids' => $gcmRegistrationIds, 'data' => $gcmMessage, 'user_guids' => $gcmUserGuids );
@@ -822,7 +835,7 @@ function pleio_api_queue_push_message($to_guid, $from_guid, $message, $object_ty
 function pleio_api_handle_push_queue() {
 	$site_guid = get_config ( "site_id" );
 	if ($site_guid == 1) { // pleio.nl only, handles all subsites
-		$max_messages = 300;
+		$max_messages = 300;				
 		set_time_limit ( 59 );
 		elgg_set_ignore_access ( 1 );
 		$messages = elgg_get_entities ( 
