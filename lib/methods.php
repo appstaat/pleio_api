@@ -38,7 +38,9 @@ function pleio_api_use_api_key($hook, $type, $returnvalue, $params) {
 
 function pleio_api_get_login() {
 	$user = elgg_get_logged_in_user_entity ();
-	return pleio_api_format_user ( $user );
+	$login = pleio_api_format_user ( $user );
+	$login ["email"] = $user ["email"];
+	return $login;
 }
 
 function pleio_api_update_device_token($device_token, $device) {
@@ -671,11 +673,11 @@ function pleio_api_save_file($data = "", $file_name = "", $title = "", $descript
 				$file->write ( $data );
 				$file->close ();
 			}
-			if (!$mimetype) {
+			if (! $mimetype) {
 				$mimetype = $file->detectMimeType ( $file->getFilenameOnFilestore () );
 			}
 			$file->setMimeType ( $mimetype );
-			$file->simpletype = file_get_simple_type($mimetype);			
+			$file->simpletype = file_get_simple_type ( $mimetype );
 		}
 		if (! $file->save ()) {
 			return new ErrorResult ( elgg_echo ( "file:uploadfailed" ) );
@@ -1194,24 +1196,19 @@ function pleio_api_get_messages($sent = 0, $search = "", $offset = 0) {
 	$searchSql = "";
 	$searchJoin = "";
 	$subtype_id = get_subtype_id ( 'object', 'messages' );
-	if ($user) {
+	if (!$user) {
+		return new ErrorResult ( $fail );
+	}
+	try {
 		if ($search) {
 			$search = sanitise_string ( $search );
 			$searchSql = " AND (description LIKE '%%$search%%' OR title LIKE '%%$search%%' ";
 			$sql = "select guid from " . get_config ( "dbprefix" ) . "users_entity where name like '%$search%' ";
 			$users = get_data ( $sql );
 			if (sizeof ( $users )) {
-				$users = array_map(function($u) 
-				
-				
-				{
-					return $u->guid;
-				}, $users)
-				
-				
-				;
+				$users = array_map(create_function ( '$user', 'return $user->guid;' ), $users);
 				$users = implode ( ",", $users );
-				$searchSql = " OR (msn2.string = '" . ($sent ? "toId" : "fromId") . "' AND msv2.string in ($users)) ";
+				$searchSql .= " OR (msn2.string = '" . ($sent ? "toId" : "fromId") . "' AND msv2.string in ($users)) ";
 				$searchJoin = " INNER JOIN " . get_config ( "dbprefix" ) . "metadata n_table2 on e.guid = n_table2.entity_guid  
 										INNER JOIN " . get_config ( "dbprefix" ) . "metastrings msn2 on n_table2.name_id = msn2.id  
 										INNER JOIN " . get_config ( "dbprefix" ) . "metastrings msv2 on n_table2.value_id = msv2.id ";
@@ -1226,7 +1223,7 @@ function pleio_api_get_messages($sent = 0, $search = "", $offset = 0) {
 			INNER JOIN " . get_config ( "dbprefix" ) . "metadata n_table on e.guid = n_table.entity_guid  
 			INNER JOIN " . get_config ( "dbprefix" ) . "metastrings msn on n_table.name_id = msn.id  
 			INNER JOIN " . get_config ( "dbprefix" ) . "metastrings msv on n_table.value_id = msv.id
-			$searchJoin			
+			$searchJoin	
 			WHERE e.owner_guid = %d
 			$searchSql 
 			AND e.type = 'object' AND e.subtype = $subtype_id
@@ -1266,6 +1263,8 @@ function pleio_api_get_messages($sent = 0, $search = "", $offset = 0) {
 				$list [] = $export;
 			}
 		}
+	} catch (Exception $ex) {
+		return new ErrorResult ( elgg_echo ( "error:default" ) );
 	}
 	return array ("total" => $total, "list" => $list, "offset" => $offset );
 }

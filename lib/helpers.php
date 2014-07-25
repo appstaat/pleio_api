@@ -373,6 +373,8 @@ function pleio_api_format_user(ElggUser $user, $token = null) {
 	if ($token) {
 		$export ["token"] = $token;
 	}
+	$export["device"] = get_private_setting ( $user->guid, "device" );
+	$export["device_token"] = get_private_setting ( $user->guid, "device_token" );
 	return $export;
 }
 
