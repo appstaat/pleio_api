@@ -514,9 +514,10 @@ function pleio_api_get_swordfish_files($user, $group_id, $swordfish_group, $fold
 	return array ("total" => sizeof ( $list ), "list" => $list, "offset" => 0 );
 }
 
-function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $offset = 0, $search = null, $filter = 0) {
+function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $file_id = 0, $offset = 0, $search = null, $filter = 0) {
 	$group_id = intval ( $group_id );
 	$user_id = intval ( $user_id );
+	$file_id = intval ( $file_id );
 	$offset = intval ( $offset );
 	$total = 0;
 	$list = array ();
@@ -545,7 +546,9 @@ function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $offse
 		$joins [] = sprintf ( 
 				"LEFT JOIN %sentity_relationships r on r.guid_two = e.guid and relationship = 'folder_of'", get_config ( "dbprefix" ) );
 		$wheres [] = 'guid_one ' . ($folder_id ? ' = ' . $folder_id : 'IS NULL');
-		if ($user_id) {
+		if ($file_id) {
+			$wheres [] = sprintf ( "e.guid = %d", $file_id );
+		} elseif ($user_id) {
 			$wheres [] = sprintf ( "e.owner_guid = %d", $user_id );
 		} elseif ($filter == 2) {
 			// friends
@@ -556,7 +559,7 @@ function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $offse
 				return array ("total" => 0, "list" => array (), "offset" => $offset );
 			}
 		}
-		if ($search) {
+		if (!$file_id && $search) {
 			$search = sanitise_string ( $search );
 			$wheres [] = " (o.description LIKE '%%$search%%' OR o.title LIKE '%%$search%%') ";
 			$joins [] = sprintf ( "INNER JOIN %sobjects_entity o on e.guid = o.guid", get_config ( "dbprefix" ) );

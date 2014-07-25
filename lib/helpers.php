@@ -52,7 +52,8 @@ function pleio_api_methods() {
 					'params' => array (
 							'group_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'folder_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
-							'user_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
+							'user_id' => array ('type' => 'int', 'required' => false, 'default' => '' ),
+							'file_id' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'offset' => array ('type' => 'int', 'required' => false, 'default' => 0 ), 
 							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
 							'filter' => array ('type' => 'int', 'required' => false, 'default' => 0, 'description' => '0 = none, 1 = mine, 2 = friends' ) ) ), 
