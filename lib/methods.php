@@ -355,6 +355,12 @@ function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search 
 				$options = array ('guid' => $item->guid, 'annotation_name' => "likes", 'count' => 1 );
 				$anno = elgg_get_annotations ( $options );
 				$e ["likes_count"] = $anno;
+				$e ["liked"] = 0;
+				if ($anno) {
+					$options = array ('guid' => $item->guid, 'annotation_name' => "likes", 'count' => 1, 'annotation_owner_guid' =>  $user->guid);
+					$anno = elgg_get_annotations ( $options );
+					$e ["liked"] = $anno > 0 ? 1 : 0 ;
+				}				
 				$list [] = $e;
 			}
 		}
@@ -767,6 +773,36 @@ function pleio_api_like_entity($guid) {
 		likes_notify_user ( $entity->getOwnerEntity (), $user, $entity );
 	}
 	return new SuccessResult ( elgg_echo ( "likes:likes" ) );
+}
+
+function pleio_api_unlike_entity($guid) {
+	$user = elgg_get_logged_in_user_entity ();
+	$user_id = $user !== false ? $user->guid : 0;
+	$guid = ( int ) $guid;
+	
+	$entity = get_entity ( $guid );	
+	if (! $entity) {
+		return new ErrorResult ( elgg_echo ( "likes:notdeleted" ) );
+	}
+	// limit likes through a plugin hook (to prevent liking your own content for example)
+	if (! $entity->canAnnotate ( $user_id, 'likes' )) {
+		return new ErrorResult ( elgg_echo ( "likes:notdeleted" ) );
+	}
+	
+	$options = array ('guid' => $guid, 'annotation_name' => "likes", 'annotation_owner_guid' => $user_id );
+	$annotations = elgg_get_annotations ( $options );
+	
+	// see if the user has liked the item
+	if (!sizeof($annotations)) {
+		return new ErrorResult ( "sizeof ". elgg_echo ( "likes:notdeleted" ) );
+	}
+	
+	//delete like(s)
+	foreach ($annotations as $annotation) {
+		elgg_delete_annotation_by_id($annotation->id);
+	}
+
+	return new SuccessResult ( elgg_echo ( "likes:deleted" ) );
 }
 
 function pleio_api_get_wikis($group_id = 0, $parent_id = 0, $user_id = 0, $offset = 0, $search = null, $filter = 0) {

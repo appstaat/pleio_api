@@ -102,7 +102,7 @@ function pleio_api_methods() {
 							'filter' => array ('type' => 'int', 'required' => false, 'description' => '0 = none, 1 = mine, 2 = friends', 'default' => '' ) ) ), 
 			'join_group' => array ('params' => array ('group_id' => array ('type' => 'int' ) ) ), 
 			'join_subsite' => array ('params' => array ('reason' => array ('type' => 'string', 'required' => false, 'default' => '' ) ) ), 
-			'like_entity' => array ('method' => 'POST', 'params' => array ('guid' => array ('type' => 'string' ) ) ), 
+			'like_entity' => array ('method' => 'POST', 'params' => array ('guid' => array ('type' => 'string' ) ) ),			 
 			'mark_message' => array ('method' => 'POST', 'params' => array ('message_id' => array ('type' => 'int' ), 'read' => array ('type' => 'int' ) ) ), 
 			'report_contact' => array (
 					'method' => 'POST', 
@@ -155,7 +155,8 @@ function pleio_api_methods() {
 							'event' => array ('type' => 'string', 'default' => '' ), 
 							'group_id' => array ('type' => 'string', 'default' => '' ), 
 							'subject_id' => array ('type' => 'string', 'default' => '' ) ) ), 
-			'swordfish_site_connect' => array ('params' => array ('subsite_id' => array ('type' => 'int' ), 'swordfish_api_url' => array ('type' => 'string' ) ) ), 
+			'swordfish_site_connect' => array ('params' => array ('subsite_id' => array ('type' => 'int' ), 'swordfish_api_url' => array ('type' => 'string' ) ) ),
+			'unlike_entity' => array ('method' => 'POST', 'params' => array ('guid' => array ('type' => 'string' ) ) ), 
 			'update_device_token' => array (
 					'method' => 'POST', 
 					'params' => array ('device_token' => array ('type' => 'string', 'default' => '' ), 'device' => array ('type' => 'string', 'default' => '' ) ) ) );
