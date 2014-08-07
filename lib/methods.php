@@ -352,14 +352,12 @@ function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search 
 				$u = pleio_api_format_user ( get_user ( $item->owner_guid ) );
 				$e ["name"] = $u ["name"];
 				$e ["avatar"] = $u ["avatar"];
-				$options = array ('guid' => $item->guid, 'annotation_name' => "likes", 'count' => 1 );
-				$anno = elgg_get_annotations ( $options );
-				$e ["likes_count"] = $anno;
+				$e ["likes_count"] = pleio_api_fetch_likes($item->guid);
 				$e ["liked"] = 0;
-				if ($anno) {
-					$options = array ('guid' => $item->guid, 'annotation_name' => "likes", 'count' => 1, 'annotation_owner_guid' =>  $user->guid);
-					$anno = elgg_get_annotations ( $options );
-					$e ["liked"] = $anno > 0 ? 1 : 0 ;
+				if ($e ["likes_count"]) {
+					//$options = array ('guid' => $item->guid, 'annotation_name' => "likes", 'count' => 1, 'annotation_owner_guid' =>  $user->guid);
+					//$anno = elgg_get_annotations ( $options );
+					$e ["liked"] = pleio_api_fetch_likes ( $item->guid, 1, 0, 0, $user->guid ) > 0 ? 1 : 0;
 				}				
 				$list [] = $e;
 			}
@@ -600,9 +598,11 @@ function pleio_api_get_files($group_id = 0, $folder_id = 0, $user_id = 0, $file_
 					}
 					$export ["can_edit"] = $item->canEdit ( $user->guid ) ? 1 : 0;
 				}
-				$options = array ('guid' => $item->guid, 'annotation_name' => "likes", 'count' => 1 );
-				$anno = elgg_get_annotations ( $options );
-				$export ["likes_count"] = $anno;
+				$export ["likes_count"] = pleio_api_fetch_likes($item->guid);
+				$export ["liked"] = 0;
+				if ($export ["likes_count"]) {
+					$export ["liked"] = pleio_api_fetch_likes ( $item->guid, 1, 0, 0, $user->guid ) > 0 ? 1 : 0;
+				}			
 				$list [] = $export;
 			}
 		}
@@ -902,6 +902,10 @@ function pleio_api_get_sub_wikis($group_id = 0, $parent_id = 0, $user_id = 0, $o
 			foreach ( $data as $item ) {
 				$export = pleio_api_export ( $item, array ("guid", "time_created", "owner_guid", "container_guid", "title", "site_guid" ) );
 				$export ["likes_count"] = pleio_api_fetch_likes ( $item->guid );
+				$export ["liked"] = 0;
+				if ($export ["likes_count"]) {
+					$export ["liked"] = pleio_api_fetch_likes ( $item->guid, 1, 0, 0, $user->guid ) > 0 ? 1 : 0;
+				}								
 				$list [] = $export;
 			}
 		}
@@ -922,10 +926,14 @@ function pleio_api_get_wiki($wiki_id, $offset = 0) {
 			$export ["parent_guid"] = $wiki->parent_guid;
 			$export ["can_edit"] = $wiki->canEdit ( $user_id ) ? 1 : 0;
 			$export ["likes_count"] = pleio_api_fetch_likes ( $wiki_id );
+			$export ["liked"] = 0;
 			$export ["likes"] = array ();
-			foreach ( pleio_api_fetch_likes ( $wiki_id, 0, $offset ) as $a ) {
-				$export ["likes"] [] = $a ["owner_guid"];
-			}
+			if ($export ["likes_count"]) {
+				$export ["liked"] = pleio_api_fetch_likes ( $item->guid, 1, 0, 0, $user->guid ) > 0 ? 1 : 0;
+				foreach ( pleio_api_fetch_likes ( $wiki_id, 0, $offset ) as $a ) {
+					$export ["likes"] [] = $a ["owner_guid"];
+				}
+			}			
 			$export ["comments_count"] = pleio_api_fetch_comments ( $wiki_id, $user_id, $offset, 1 );
 			$subwikis = pleio_api_get_sub_wikis ( $wiki->container_guid, $wiki_id, 0, $offset );
 			$export ["sub_wikis_count"] = $subwikis ["total"];

@@ -537,8 +537,11 @@ function pleio_api_add_contact_by_user($user, $contact) {
 	}
 }
 
-function pleio_api_fetch_likes($guid = 0, $count = 1, $offset = 0, $limit = 50) {
+function pleio_api_fetch_likes($guid = 0, $count = 1, $offset = 0, $limit = 50, $owner_guid = 0) {
 	$options = array ('guid' => $guid, 'annotation_name' => "likes", 'limit' => $limit, 'offset' => $offset, 'count' => $count );
+	if ($owner_guid) {
+		$options['annotation_owner_guid'] = $owner_guid;
+	}
 	return elgg_get_annotations ( $options );
 }
 
