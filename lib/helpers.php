@@ -380,7 +380,7 @@ function pleio_api_format_user(ElggUser $user, $token = null) {
 	return $export;
 }
 
-function pleio_api_fetch_comments($guid = 0, $user_guid = 0, $offset = 0, $count = false, $limit = 5) {
+function pleio_api_fetch_comments($guid = 0, $user_guid = 0, $offset = 0, $count = false, $limit = 20) {
 	$options = array ('guid' => $guid, 'annotation_name' => "generic_comment", 'limit' => $limit, 'offset' => $offset, 'count' => 1 );
 	if ($count) {
 		return elgg_get_annotations ( $options );

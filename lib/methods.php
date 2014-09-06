@@ -655,7 +655,8 @@ function pleio_api_save_file($data = "", $file_name = "", $title = "", $descript
 	} else {
 		if ($file_id) {
 			$file = get_entity ( $file_id );
-		} else {
+		}
+		if (!$file) {
 			$file = new ElggFile ( );
 			$file->owner_guid = $user_id;
 		}
