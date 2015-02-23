@@ -88,7 +88,8 @@ function pleio_api_methods() {
 							'user_id' => array ('type' => 'int', 'required' => false, 'default' => '' ), 
 							'filter' => array ('type' => 'int', 'required' => false, 'description' => '0 = none, 1 = mine, 2 = friends', 'default' => '' ), 
 							'search' => array ('type' => 'string', 'required' => false, 'default' => '' ), 
-							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
+							'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ),
+							'parent_id' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 
 			'get_user' => array ('params' => array ('user_id' => array ('type' => 'int' ) ) ), 
 			'get_wiki' => array (
 					'params' => array ('wiki_id' => array ('type' => 'string' ), 'offset' => array ('type' => 'int', 'required' => false, 'default' => '' ) ) ), 

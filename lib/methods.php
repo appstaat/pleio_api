@@ -308,22 +308,27 @@ function pleio_api_get_group_icon($group_id = 0) {
 	return new ErrorResult ( "Groep niet gevonden of geen lid" );
 }
 
-function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search = null, $offset = 0, $wheres = array (), $joins = array()) {
+function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search = null, $offset = 0, $parent_id = 0) {
+	$wheres = $joins = array();
 	$user = elgg_get_logged_in_user_entity ();
 	$list = array ();
 	$total = 0;
 	$offset = intval ( $offset );
+	$parent_id = intval($parent_id);
 	if ($user) {
 		if ($search) {
 			$search = sanitise_string ( $search );
 			$wheres [] = " (o.description LIKE '%$search%') ";
 			$joins [] = sprintf ( " INNER JOIN %sobjects_entity o USING (guid) ", get_config ( "dbprefix" ) );
-		}
+		}				
 		$options = array ('type' => 'object', 'subtype' => 'thewire', 'limit' => 20, 'offset' => $offset, 'count' => true, "wheres" => $wheres, "joins" => $joins );
+		$options ['joins'] [] = sprintf ( " LEFT JOIN %sentity_relationships er on er.guid_one = e.guid ", get_config ( "dbprefix" ) );		
 		if ($group_id) {
 			$options ['container_guids'] = $group_id;
 		}
-		if ($user_id) {
+		if ($parent_id) {
+			$options ['wheres'] = sprintf(" er.guid_two = %s ", $parent_id);
+		} elseif ($user_id) {
 			$options ['owner_guids'] = $user_id;
 		}
 		switch ($filter) {
@@ -342,13 +347,18 @@ function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search 
 		$total = elgg_get_entities ( $options );
 		if ($total) {
 			$options ['count'] = false;
+			$options ['selects'] [] = 'er.guid_two as parent_guid, count(erc.guid_one) as childs';
+			$options ['joins'] [] = sprintf ( " LEFT JOIN %sentity_relationships erc on erc.guid_two = e.guid ", get_config ( "dbprefix" ) );
+			$options ['group_by'] = 'e.guid';						
 			$items = elgg_get_entities ( $options );
 			foreach ( $items as $item ) {
-				$e = pleio_api_export ( $item, explode ( ",", "guid,time_created,owner_guid,container_guid,site_guid,description" ) );
-				$parent = get_data_row ( 
-						sprintf ( "select guid_two as guid from %sentity_relationships where relationship = 'parent' and guid_one = %d", get_config ( "dbprefix" ), 
-								$e ["guid"] ) );
-				$e ["parent_guid"] = $parent ? intval ( $parent->guid ) : 0;
+				$e = pleio_api_export ( $item, explode ( ",", "guid,time_created,owner_guid,container_guid,site_guid,description,parent_guid,childs" ) );
+//				$parent = get_data_row ( 
+//						sprintf ( "select guid_two as guid from %sentity_relationships where relationship = 'parent' and guid_one = %d", get_config ( "dbprefix" ), 
+//								$e ["guid"] ) );
+//				$e ["parent_guid"] = $parent ? intval ( $parent->guid ) : 0;
+				$e ["parent_guid"] = $e ["parent_guid"] ? intval($e ["parent_guid"]) : 0;
+				$e ["child"] = $e ["childs"] ? intval($e ["childs"]) : 0;
 				$u = pleio_api_format_user ( get_user ( $item->owner_guid ) );
 				$e ["name"] = $u ["name"];
 				$e ["avatar"] = $u ["avatar"];
