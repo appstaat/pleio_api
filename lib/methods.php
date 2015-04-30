@@ -326,8 +326,10 @@ function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search 
 		if ($group_id) {
 			$options ['container_guids'] = $group_id;
 		}
-		if ($parent_id) {
-			$options ['wheres'] = sprintf(" er.guid_two = %s ", $parent_id);
+		if ($parent_id) {			
+			$options["metadata_name"] = "wire_thread";
+			$options["metadata_value"] = $parent_id;
+			//$options ['wheres'] = sprintf(" er.guid_two = %s ", $parent_id);
 		} elseif ($user_id) {
 			$options ['owner_guids'] = $user_id;
 		}
@@ -344,32 +346,15 @@ function pleio_api_get_tweios($group_id = 0, $user_id = 0, $filter = 0, $search 
 				}
 				break;
 		}
-		$total = elgg_get_entities ( $options );
+		$total = elgg_get_entities_from_metadata ( $options );
 		if ($total) {
 			$options ['count'] = false;
 			$options ['selects'] [] = 'er.guid_two as parent_guid, count(erc.guid_one) as childs';
 			$options ['joins'] [] = sprintf ( " LEFT JOIN %sentity_relationships erc on erc.guid_two = e.guid ", get_config ( "dbprefix" ) );
 			$options ['group_by'] = 'e.guid';						
-			$items = elgg_get_entities ( $options );
-			foreach ( $items as $item ) {
-				$e = pleio_api_export ( $item, explode ( ",", "guid,time_created,owner_guid,container_guid,site_guid,description,parent_guid,childs" ) );
-//				$parent = get_data_row ( 
-//						sprintf ( "select guid_two as guid from %sentity_relationships where relationship = 'parent' and guid_one = %d", get_config ( "dbprefix" ), 
-//								$e ["guid"] ) );
-//				$e ["parent_guid"] = $parent ? intval ( $parent->guid ) : 0;
-				$e ["parent_guid"] = $e ["parent_guid"] ? intval($e ["parent_guid"]) : 0;
-				$e ["child"] = $e ["childs"] ? intval($e ["childs"]) : 0;
-				$u = pleio_api_format_user ( get_user ( $item->owner_guid ) );
-				$e ["name"] = $u ["name"];
-				$e ["avatar"] = $u ["avatar"];
-				$e ["likes_count"] = pleio_api_fetch_likes($item->guid);
-				$e ["liked"] = 0;
-				if ($e ["likes_count"]) {
-					//$options = array ('guid' => $item->guid, 'annotation_name' => "likes", 'count' => 1, 'annotation_owner_guid' =>  $user->guid);
-					//$anno = elgg_get_annotations ( $options );
-					$e ["liked"] = pleio_api_fetch_likes ( $item->guid, 1, 0, 0, $user->guid ) > 0 ? 1 : 0;
-				}				
-				$list [] = $e;
+			$items = elgg_get_entities_from_metadata ( $options );
+			foreach ( $items as $item ) {		
+				$list [] = pleio_api_format_tweio($item);
 			}
 		}
 	}

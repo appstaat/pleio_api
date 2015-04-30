@@ -901,3 +901,26 @@ function pleio_api_save_ios_push_certificate($contents) {
 	}
 	return false;
 }
+
+function pleio_api_format_tweio($item) {
+	$e = pleio_api_export ( $item, explode ( ",", "guid,time_created,owner_guid,container_guid,site_guid,description,parent_guid,childs" ) );
+	//				$parent = get_data_row ( 
+	//						sprintf ( "select guid_two as guid from %sentity_relationships where relationship = 'parent' and guid_one = %d", get_config ( "dbprefix" ), 
+	//								$e ["guid"] ) );
+	//				$e ["parent_guid"] = $parent ? intval ( $parent->guid ) : 0;
+	$e ["parent_guid"] = $e ["parent_guid"] ? intval ( $e ["parent_guid"] ) : 0;
+	$e ["wire_thread"] = $item->wire_thread;
+	$e ["reply"] = $item->reply;
+	$e ["thread_id"] = $item->wire_thread && ($item->reply || ($item->wire_thread == $e["guid"] && $e["childs"])) ? (string)$item->wire_thread : "0";
+	$u = pleio_api_format_user ( get_user ( $item->owner_guid ) );
+	$e ["name"] = $u ["name"];
+	$e ["avatar"] = $u ["avatar"];
+	$e ["likes_count"] = pleio_api_fetch_likes ( $item->guid );
+	$e ["liked"] = 0;
+	if ($e ["likes_count"]) {
+		//$options = array ('guid' => $item->guid, 'annotation_name' => "likes", 'count' => 1, 'annotation_owner_guid' =>  $user->guid);
+		//$anno = elgg_get_annotations ( $options );
+		$e ["liked"] = pleio_api_fetch_likes ( $item->guid, 1, 0, 0, $user->guid ) > 0 ? 1 : 0;
+	}
+	return $e;
+}
