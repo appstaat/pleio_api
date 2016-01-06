@@ -1,5 +1,16 @@
 = Version History =
 
+1.1:
+
+- get tweio conversation
+- get tweios by parent, removed query from loop
+- file upload fix
+- fetch liked status for wiki/pages and files
+- pass tweios liked status, generic unlike function
+- new param file_id to get info on single file
+- get_login email fix
+- get_messages search fix
+
 0.2:
 
 - Android push
