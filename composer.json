@@ -1,0 +1,15 @@
+{
+    "name": "appstaat/pleio_api",
+    "description": "This plugin provides the API for the Overheidsplein app",
+    "type": "elgg-plugin",
+    "keywords": ["pleio", "plugin", "api"],
+    "license": "GPL-2.0",
+    "support": {
+        "source": "https://github.com/appstaat/pleio_api",
+        "issues": "https://github.com/appstaat/pleio_api/issues"
+    },
+    "require": {
+        "elgg/elgg": ">=1.8",
+        "pleio/ws_pack": "*"
+    }
+}
