@@ -81,7 +81,8 @@ function pleio_api_get_all_subsites($search = null, $subsite_id = 0, $locked_fil
 		$joins [] = sprintf ( " INNER JOIN %sprivate_settings ps ON ps.entity_guid = guid ", get_config ( "dbprefix" ) );
 		$wheres [] = " ps.name = 'membership' AND ps.value != 'open' ";
 	}
-	$options = array ('type' => 'site', 'limit' => 20, 'offset' => $offset, 'count' => true, "wheres" => $wheres, "joins" => $joins );
+	$options = array ('type' => 'site', 'limit' => 20, 'offset' => $offset, 'count' => true, "wheres" => $wheres, "joins" => $joins, 
+	    'site_guid' => ELGG_ENTITIES_ANY_VALUE );
 	if ($subsite_id) {
 		$options ["guids"] = $subsite_id;
 	}
