@@ -7,9 +7,5 @@
     "support": {
         "source": "https://github.com/appstaat/pleio_api",
         "issues": "https://github.com/appstaat/pleio_api/issues"
-    },
-    "require": {
-        "elgg/elgg": ">=1.8",
-        "pleio/ws_pack": "*"
     }
 }
