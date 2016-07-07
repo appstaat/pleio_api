@@ -459,7 +459,9 @@ function pleio_api_format_activity($item) {
 				"m" => trim ( $message ), 
 				"t" => $item->posted, 
 				"avatar" => $avatar, 
-				"d" => $description );
+				"d" => $description,
+		        "can_edit" => $object->canEdit() ? 1 : 0
+		);
 	}
 }
 

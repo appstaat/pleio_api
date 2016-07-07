@@ -932,7 +932,7 @@ function pleio_api_get_wiki($wiki_id, $offset = 0) {
 				}
 			}			
 			$export ["comments_count"] = pleio_api_fetch_comments ( $wiki_id, $user_id, $offset, 1 );
-			$subwikis = pleio_api_get_sub_wikis ( $wiki->container_guid, $wiki_id, 0, $offset );
+			$subwikis = pleio_api_get_sub_wikis ( 0, $wiki_id, 0, $offset );
 			$export ["sub_wikis_count"] = $subwikis ["total"];
 			$export ["description"] = preg_replace ( "/^\s*\/\/\s*/ism", "", $export ["description"] );
 			$author = pleio_api_format_user ( get_entity ( $export ["owner_guid"] ) );
@@ -1002,7 +1002,7 @@ function pleio_api_swordfish_parse_get_page($result, $swordfish_name) {
 		}
 		$export ["name"] = "";
 		$export ["access_id"] = $response->visibility == "private" ? 0 : 2;
-		$export ["access_name"] = $response->visibility == "private" ? "Privé" : "Publiek";
+		$export ["access_name"] = $response->visibility == "private" ? "PrivÃ©" : "Publiek";
 		$export ["write_access_name"] = "";
 		$export ["allow_comments"] = $response->commentAllowed ? "yes" : "no";
 		$export ["can_edit"] = 1;
